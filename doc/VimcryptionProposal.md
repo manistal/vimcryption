@@ -14,4 +14,21 @@ All Vim plugins require some vimscript to interact with the editor itself and lo
 
 ## The Python Encryption Backend
 
-Since Vim natively supports Python based plugins, we'll be writing the heavy lifting code in Python. 
+Since Vim natively supports Python based plugins, we'll be writing the heavy lifting code in Python. This is where we'll implement the encryption, reading and storing of the keys, and the decryption/file loading. 
+
+## Plugin Layout
+
+We're going to build the plugin to be Pathogen-compatible, so we'll be using the standard vim plugin layout inside of a git repository that can be used in Vundle or Pathogen calls (https://github.com/tsmanner/vimcryption). The help messages for the plugin will be inside of a docs directory to be auto-detected and the plugin will be instantiated on editor load via the plugin dir. Since encryption needs to be always on we will not use file-type detection (ftplugin directories), or load-on-demand (autoload directories). 
+
+```
+vimcryption/
+    LICENSE
+    README
+    docs/
+        vimcryption.txt
+    plugin/
+        vimcryption.vim
+        vimcryption.py
+```
+
+
