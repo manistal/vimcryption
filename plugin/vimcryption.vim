@@ -15,8 +15,8 @@ endif
 " This is just one way to invoke python
 " you can also call 'pyfile' or 'python << EOF' 
 function! Vimcrypt()
-    exec python "import vimcryption"
-    exec python "vimcryption.hello()"
+    exec :py "import vimcryption"
+    exec :py "vimcryption.hello()"
 endfunc
 
 " *Note* All user defined commands and functions
