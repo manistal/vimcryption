@@ -102,3 +102,6 @@ ENV/
 
 # Mac OS Crap
 .DS_Store
+
+# ctags
+*.ctags
