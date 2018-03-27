@@ -17,28 +17,57 @@ endif
 
 " This is just one way to invoke python
 " you can also call 'pyfile' or 'python << EOF' 
-function! Vimcrypt()
-
 " Found a good importing example here:
 " https://robertbasic.com/blog/import-custom-python-modules-in-vim-plugins/
-python << endpython
+" function! LoadVimcrypt()
+" python << endpython
+" 
+" import os
+" import sys
+" import vim
+" 
+" # Get the Vim variable to Python
+" plugin_path = vim.eval("g:plugin_path")
+" # Append it to the system paths
+" sys.path.append(plugin_path)
+" 
+" # And import!
+" import vimcryption as vc
+" 
+" endpython
+" endfunc
+" 
+" function! Vimcrypt()
+" python << endpython
+" 
+" vim.current.buffer.append("LOL")
+" print vc.FileRead()
+" 
+" endpython
+" endfunc
+" 
+" " *Note* All user defined commands and functions
+" "        must start with an upper case letter
+" command! Vimcrypt call Vimcrypt()
+" au BufEnter * call LoadVimcrypt()
 
-import os
-import sys
-import vim
+python import sys
+python import vim
+python sys.path.append(vim.eval('expand("<sfile>:h")'))
+python import vimcryption 
+python VCF = vimcryption.VCFileHandler()
 
-# Get the Vim variable to Python
-plugin_path = vim.eval("g:plugin_path")
-# Append it to the system paths
-sys.path.append(plugin_path)
 
-# And import!
-import vimcryption
-vimcryption.hello()
-endpython
+" https://www.ibm.com/developerworks/library/l-vim-script-5/index.html
+" Overload Write/Read commands for vimcryption
+augroup Vimcryption
+  au! 
+  au BufReadCmd    *    py VCF.BufRead()
+  au FileReadCmd   *    py VCF.FileRead()
+  au BufWriteCmd   *    py VCF.BufWrite()
+  au FileWriteCmd  *    py VCF.FileWrite()
+"  au FileAppendCmd *    py VCF.FileAppend()
+augroup END 
+ 
 
-endfunc
 
-" *Note* All user defined commands and functions
-"        must start with an upper case letter
-command! Vimcrypt call Vimcrypt()
