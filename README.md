@@ -1,9 +1,12 @@
 # vimcryption
+
 Encryption plugin for VIM.
 
+## Links 
 
+https://robertbasic.com/blog/import-custom-python-modules-in-vim-plugins/
 
-## TODO 
+https://www.ibm.com/developerworks/library/l-vim-script-5/index.html
 
 ### Intercept all File Reads and Writes
 
