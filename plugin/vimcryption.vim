@@ -3,42 +3,37 @@
 let g:plugin_path = expand('<sfile>:p:h')
 
 " Always check to make sure dependancies are satisified 	
-if !has('python')
+" eventually we should also check if we're enabled
+if has('python3')
+    " command! VCPython python3
+elseif has('python')
+    " command! VCPython python
+else 
     echo "Vim has to be compiled with +python to run this!" 
     finish
 endif
 
-" It seems like Python3 is hard to come by in vim
-" if !has('py3')
-"     echo "Python 3 is required to run vimcryption!"
-"     finish
-" endif
+
+" Load the python libraries when the plugin is loaded
+python import sys
+python import vim
+python sys.path.append(vim.eval('expand("<sfile>:h")'))
+python import vimcryption 
+python VCF = vimcryption.VCFileHandler()
 
 
-" This is just one way to invoke python
-" you can also call 'pyfile' or 'python << EOF' 
-function! Vimcrypt()
+" Overload Write/Read commands for vimcryption
+augroup Vimcryption
+  au! 
+  au BufReadCmd    *    py VCF.BufRead()
+  au FileReadCmd   *    py VCF.FileRead()
+  au BufWriteCmd   *    py VCF.BufWrite()
+  au FileWriteCmd  *    py VCF.FileWrite()
+"  au FileAppendCmd *    py VCF.FileAppend()
+augroup END 
+ 
 
-" Found a good importing example here:
-" https://robertbasic.com/blog/import-custom-python-modules-in-vim-plugins/
-python << endpython
-
-import os
-import sys
-import vim
-
-# Get the Vim variable to Python
-plugin_path = vim.eval("g:plugin_path")
-# Append it to the system paths
-sys.path.append(plugin_path)
-
-# And import!
-import vimcryption
-vimcryption.hello()
-endpython
-
-endfunc
-
-" *Note* All user defined commands and functions
-"        must start with an upper case letter
-command! Vimcrypt call Vimcrypt()
+" " *Note* All user defined commands and functions
+" "        must start with an upper case letter
+" command! Vimcrypt call Vimcrypt()
+" au BufEnter * call LoadVimcrypt()

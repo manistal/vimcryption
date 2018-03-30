@@ -103,5 +103,8 @@ ENV/
 # Mac OS Crap
 .DS_Store
 
+# VS Code
+.vscode
+
 # ctags
 *.ctags
