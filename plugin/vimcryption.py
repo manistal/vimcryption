@@ -1,6 +1,9 @@
+"""
 
+"""
 import vim
 import os
+
 
 def GhettoGenerator(text_sequence):
     """ To be replaced by our actual encryptor/decryptors
@@ -9,6 +12,7 @@ def GhettoGenerator(text_sequence):
     """
     for line in text_sequence:
         yield line
+
 
 class VCFileHandler():
     def __init__(self, config=None):
