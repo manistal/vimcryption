@@ -44,7 +44,7 @@ class VCFileHandler():
         """
         file_name = vim.current.buffer.name
         with open(file_name, 'w+') as current_file:
-            current_file.writelines("\n".join(vim.current.buffer))
+            current_file.write("\n".join(vim.current.buffer))
 
         vim.command(':set nomodified')
 
