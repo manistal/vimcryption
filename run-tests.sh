@@ -1,33 +1,26 @@
+__do_tests() {
+  echo "-BEGIN- Python $1 Testing."
+  echo "    Creating Python$1 virtual envrionment in venv$1..."
+  rm -rf venv$1
+  virtualenv -p python venv$1
+  echo "    done."
+  PATH=venv$1/bin:$PATH
+  echo "    Installing vimcryption into venv$1..."
+  pip install nose2
+  python testsetup.py install
+  echo "    done."
+  echo "--Running Tests--"
+  nose2 -s plugin/
+  echo "----Complete-----"
+  echo "--END-- Python $1 Testing."
+  echo
+  echo
+}
+
 # Python 2 testing
 # Set up a Python 2 virtual environment.
-echo "-BEGIN- Python 2 Testing."
-echo "    Creating Python2 virtual envrionment in test/venv2..."
-rm -rf test/venv2
-virtualenv -p python test/venv2
-echo "    done."
-alias python="test/venv2/bin/python"
-alias pip="test/venv2/bin/pip"
-echo "    Installing vimcryption into venv2..."
-pip install nose2
-python testsetup.py install
-echo "    done."
-echo "--END-- Python 2 Testing."
-echo
-echo
+__do_tests 2
+__do_tests 3
 
 # Python 3 testing
 # Set up a Python 3 virtual environment.
-echo "-BEGIN- Python 3 Testing."
-echo "    Creating Python3 virtual envrionment in test/venv3..."
-rm -rf test/venv3
-virtualenv -p python3 test/venv3
-echo "    done."
-alias python="test/venv3/bin/python3"
-alias pip="test/venv3/bin/pip"
-echo "    Installing vimcryption into venv3..."
-pip install nose2
-python testsetup.py install
-echo "    done."
-echo "--END-- Python 3 Testing."
-echo
-echo
