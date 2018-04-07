@@ -16,6 +16,10 @@ class VCFileHandler():
         with open(file_name, 'r+') as current_file:
             vim.current.buffer.append(current_file.readlines())
 
+        # Vim adds an extra line at the top of the buffer 
+        # We need to remove it or files keep getting longer
+        del vim.current.buffer[0]
+
     def FileRead(self):
         """
         FileReadCmd: Before reading a file with a ":read" command.
@@ -24,6 +28,10 @@ class VCFileHandler():
         file_name = vim.current.buffer.name
         with open(file_name, 'r+') as current_file:
             vim.current.buffer.append(current_file.readlines())
+
+        # Vim adds an extra line at the top of the buffer 
+        # We need to remove it or files keep getting longer
+        del vim.current.buffer[0]
 
     def BufWrite(self):
         """
@@ -44,8 +52,11 @@ class VCFileHandler():
         '[ and '] marks for the range of lines.
         """
         file_name = vim.current.buffer.name
+        buf_start, buf_end = vim.buffer.mark("'["), vim.buffer.mark("']") 
+        current_range = vim.buffer.range(buf_start, buf_end)
+
         with open(file_name, 'w+') as current_file:
-            current_file.writelines("\n".join(vim.current.buffer))
+            current_file.write("\n".join(current_range))
 
         vim.command(':set nomodified')
 
@@ -54,6 +65,13 @@ class VCFileHandler():
         FileAppendCmd: Before appending to a file.  Should do the
         appending to the file.  Use the '[ and '] marks for the range of lines.
         """
-        pass
+        file_name = vim.current.buffer.name
+        buf_start, buf_end = vim.buffer.mark("'["), vim.buffer.mark("']") 
+        current_range = vim.buffer.range(buf_start, buf_end)
+
+        with open(file_name, 'a') as current_file:
+            current_file.write("\n".join(current_range))
+
+        vim.command(':set nomodified')
 
 
