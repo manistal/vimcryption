@@ -1,11 +1,22 @@
 
 import vim
+import os
 
+def GhettoGenerator(text_sequence):
+    """ To be replaced by our actual encryptor/decryptors
+        recieves iteratble text sequence, expects lines returned
+        no line break characters returned, only lines, line breaks inserted by VCF
+    """
+    for line in text_sequence:
+        yield line
 
 class VCFileHandler():
     def __init__(self, config=None):
         if config:
             self.config = config
+
+    def ProcessHeader(self):
+        pass
 
     def BufRead(self):
         """
@@ -13,8 +24,18 @@ class VCFileHandler():
         Should read the file into the buffer. 
         """
         file_name = vim.current.buffer.name
+
+        # Don't do anything if the file doesnt exist
+        # Write functions will create file
+        if not os.path.exists(file_name): return
+
         with open(file_name, 'r+') as current_file:
-            vim.current.buffer.append(current_file.readlines())
+            for line in GhettoGenerator(current_file):
+                vim.current.buffer.append(line)
+
+        # Vim adds an extra line at the top of the buffer 
+        # We need to remove it or files keep getting longer
+        del vim.current.buffer[0]
 
     def FileRead(self):
         """
@@ -22,8 +43,18 @@ class VCFileHandler():
         Should do the reading of the file.
         """
         file_name = vim.current.buffer.name
+
+        # Don't do anything if the file doesnt exist
+        # Write functions will create file
+        if not os.path.exists(file_name): return
+
         with open(file_name, 'r+') as current_file:
-            vim.current.buffer.append(current_file.readlines())
+            for line in GhettoGenerator(current_file):
+                vim.current.buffer.append(line)
+
+        # Vim adds an extra line at the top of the buffer 
+        # We need to remove it or files keep getting longer
+        del vim.current.buffer[0]
 
     def BufWrite(self):
         """
@@ -32,8 +63,10 @@ class VCFileHandler():
         'cpo' and writing to another file |cpo-+|. The buffer contents should not be changed.
         """
         file_name = vim.current.buffer.name
+
         with open(file_name, 'w+') as current_file:
-            current_file.writelines("\n".join(vim.current.buffer))
+            for line in GhettoGenerator(vim.current.buffer):
+                current_file.write(line + "\n")
 
         vim.command(':set nomodified')
 
@@ -44,8 +77,13 @@ class VCFileHandler():
         '[ and '] marks for the range of lines.
         """
         file_name = vim.current.buffer.name
+        buf_start_line, buf_start_col = vim.buffer.mark("'[")
+        buf_end_line, buf_end_col = vim.buffer.mark("']") 
+        current_range = vim.buffer.range(buf_start_line, buf_end_line)
+
         with open(file_name, 'w+') as current_file:
-            current_file.writelines("\n".join(vim.current.buffer))
+            for line in GhettoGenerator(current_range):
+                current_file.write(line + "\n")
 
         vim.command(':set nomodified')
 
@@ -54,6 +92,15 @@ class VCFileHandler():
         FileAppendCmd: Before appending to a file.  Should do the
         appending to the file.  Use the '[ and '] marks for the range of lines.
         """
-        pass
+        file_name = vim.current.buffer.name
+        buf_start_line, buf_start_col = vim.buffer.mark("'[")
+        buf_end_line, buf_end_col = vim.buffer.mark("']") 
+        current_range = vim.buffer.range(buf_start_line, buf_end_line)
+
+        with open(file_name, 'a') as current_file:
+            for line in GhettoGenerator(current_range):
+                current_file.write(line + "\n")
+
+        vim.command(':set nomodified')
 
 

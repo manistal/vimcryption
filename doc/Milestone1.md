@@ -21,3 +21,9 @@
         - encrypt(buffer)
         - decrypt(file)
 - Add Password or Key support
+
+##Resources
+
+- Learn VimScript the Hard Way `http://learnvimscriptthehardway.stevelosh.com/chapters/53.html`
+- Vim Documentation: Autocmd `http://vimdoc.sourceforge.net/htmldoc/autocmd.html`
+- Vim Documentation: Python `http://vimdoc.sourceforge.net/htmldoc/if_pyth.html`
