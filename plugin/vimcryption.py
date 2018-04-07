@@ -7,6 +7,9 @@ class VCFileHandler():
         if config:
             self.config = config
 
+    def ProcessHeader(self):
+        pass
+
     def BufRead(self):
         """
         BufReadCmd: Before starting to edit a new buffer.  
@@ -52,8 +55,9 @@ class VCFileHandler():
         '[ and '] marks for the range of lines.
         """
         file_name = vim.current.buffer.name
-        buf_start, buf_end = vim.buffer.mark("'["), vim.buffer.mark("']") 
-        current_range = vim.buffer.range(buf_start, buf_end)
+        buf_start_line, buf_start_col = vim.buffer.mark("'[")
+        buf_end_line, buf_end_col = vim.buffer.mark("']") 
+        current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
         with open(file_name, 'w+') as current_file:
             current_file.write("\n".join(current_range))
@@ -66,8 +70,9 @@ class VCFileHandler():
         appending to the file.  Use the '[ and '] marks for the range of lines.
         """
         file_name = vim.current.buffer.name
-        buf_start, buf_end = vim.buffer.mark("'["), vim.buffer.mark("']") 
-        current_range = vim.buffer.range(buf_start, buf_end)
+        buf_start_line, buf_start_col = vim.buffer.mark("'[")
+        buf_end_line, buf_end_col = vim.buffer.mark("']") 
+        current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
         with open(file_name, 'a') as current_file:
             current_file.write("\n".join(current_range))
