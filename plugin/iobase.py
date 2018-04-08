@@ -25,8 +25,12 @@ class IOPassThrough:
     """
     def encrypt(self, data):
         # type: (Union[List[str], str]) -> Union[List[str], str]:
-        return data
+        if isinstance(data, str):
+            yield data
+        iter(data)
 
     def decrypt(self, data):
         # type: (Union[List[str], str]) -> Union[List[str], str]:
-        return data
+        if isinstance(data, str):
+            yield data
+        iter(data)
