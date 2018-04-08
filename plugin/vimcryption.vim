@@ -29,7 +29,7 @@ augroup Vimcryption
   au FileReadCmd   *    py VCF.FileRead()
   au BufWriteCmd   *    py VCF.BufWrite()
   au FileWriteCmd  *    py VCF.FileWrite()
-"  au FileAppendCmd *    py VCF.FileAppend()
+  au FileAppendCmd *    py VCF.FileAppend()
 augroup END 
  
 
