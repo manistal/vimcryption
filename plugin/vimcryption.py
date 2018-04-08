@@ -1,6 +1,8 @@
 
 import vim
 import os
+import binascii
+from base64 import b64decode, b64encode
 
 def GhettoGenerator(text_sequence):
     """ To be replaced by our actual encryptor/decryptors
@@ -10,13 +12,32 @@ def GhettoGenerator(text_sequence):
     for line in text_sequence:
         yield line
 
+Decryptor = GhettoGenerator
+Encryptor = GhettoGenerator
+Plaintext = GhettoGenerator
+
 class VCFileHandler():
     def __init__(self, config=None):
         if config:
             self.config = config
 
-    def ProcessHeader(self):
-        pass
+    def ProcessHeader(self, file_handle):
+        # First check to see if we should be handling it 
+        self.generator = Plaintext
+        header_entry = file_handle.read(16)
+
+        try:
+            if (header_entry and (b64decode(header_entry) == 'vimcrypted')):
+                self.generator = Decryptor
+
+        except TypeError as e:
+            file_handle.seek(0) # its not ours, reset
+
+        except binascii.Error as e:
+            file_handle.seek(0) # not ours, python3 support
+
+    def WriteHeader(self, file_handle):
+        file_handle.write(b64encode('vimcrypted'))
 
     def BufRead(self):
         """
@@ -29,8 +50,9 @@ class VCFileHandler():
         # Write functions will create file
         if not os.path.exists(file_name): return
 
-        with open(file_name, 'r+') as current_file:
-            for line in GhettoGenerator(current_file):
+        with open(file_name, 'rb+') as current_file:
+            self.ProcessHeader(current_file)
+            for line in self.generator(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -48,8 +70,9 @@ class VCFileHandler():
         # Write functions will create file
         if not os.path.exists(file_name): return
 
-        with open(file_name, 'r+') as current_file:
-            for line in GhettoGenerator(current_file):
+        with open(file_name, 'rb+') as current_file:
+            self.ProcessHeader(current_file)
+            for line in self.generator(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -64,7 +87,8 @@ class VCFileHandler():
         """
         file_name = vim.current.buffer.name
 
-        with open(file_name, 'w+') as current_file:
+        with open(file_name, 'wb+') as current_file:
+            self.WriteHeader(current_file)
             for line in GhettoGenerator(vim.current.buffer):
                 current_file.write(line + "\n")
 
@@ -81,7 +105,7 @@ class VCFileHandler():
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
-        with open(file_name, 'w+') as current_file:
+        with open(file_name, 'wb+') as current_file:
             for line in GhettoGenerator(current_range):
                 current_file.write(line + "\n")
 
@@ -97,7 +121,7 @@ class VCFileHandler():
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
-        with open(file_name, 'a') as current_file:
+        with open(file_name, 'ab') as current_file:
             for line in GhettoGenerator(current_range):
                 current_file.write(line + "\n")
 
