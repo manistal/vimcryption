@@ -1,40 +1,53 @@
 """
-
 """
+
 import vim
 import os
 import binascii
 from base64 import b64decode, b64encode
+from iobase import IOPassThrough
 
-
-def GhettoGenerator(text_sequence):
-    """ To be replaced by our actual encryptor/decryptors
-        recieves iteratble text sequence, expects lines returned
-        no line break characters returned, only lines, line breaks inserted by VCF
-    """
-    for line in text_sequence:
-        yield line
-
-<<<<<<< HEAD
-Decryptor = GhettoGenerator
-Encryptor = GhettoGenerator
-Plaintext = GhettoGenerator
-=======
->>>>>>> 7d3db178e74f091c365e7f31c1221a5e94c88f1e
 
 class VCFileHandler():
+    _CIPHER_GEN_MAP_ = {
+        'IOPASS' : IOPassThrough, 
+        'BASE64' : IOPassThrough, 
+        'AES128' : IOPassThrough, 
+        'AES256' : IOPassThrough
+    }
+
     def __init__(self, config=None):
+        self.io_generator = IOPassThrough
+
         if config:
             self.config = config
 
     def ProcessHeader(self, file_handle):
-        # First check to see if we should be handling it 
-        self.generator = Plaintext
-        header_entry = file_handle.read(16)
-
+        """ Process vimcryption header
+            @param file_handle expects file-like bytes object
+            0:15 (16)  bytes - b64encode of "vimcryption" if the file is our type
+            16:23 (8)  bytes - b64encode of cipher, always 6 chars (AES128, AES256, BASE64, IOPASS)
+            24:88 (64) bytes - sha256 hash of key/password for file (optional)
+        """
         try:
-            if (header_entry and (b64decode(header_entry) == 'vimcrypted')):
-                self.generator = Decryptor
+            # First check to see if we should be handling it 
+            header_valid = b64decode(file_handle.read(16))
+            if (header_valid != 'vimcrypted'):
+                # Not encrypted, just pass data through 
+                # TODO: might want to run a vim command to unregister us if its not our file
+                #       can then have a different command hook to reregister for enables
+                file_handle.seek(0) # its not ours, reset
+                self.io_generator = IOPassThrough
+                return 
+
+
+            # Which cipher
+            header_cipher = b64decode(file_handle.read(8))
+            self.io_generator = self._CIPHER_GEN_MAP_[header_cipher]
+
+            # if self.io_generator_needs_key()
+            # header_haskey = file_handle.read(64)
+            
 
         except TypeError as e:
             file_handle.seek(0) # its not ours, reset
@@ -44,6 +57,9 @@ class VCFileHandler():
 
     def WriteHeader(self, file_handle):
         file_handle.write(b64encode('vimcrypted'))
+        file_handle.write(b64encode('IOPASS'))
+        print("IOPASS",b64encode('IOPASS'))
+
 
     def BufRead(self):
         """
@@ -58,7 +74,8 @@ class VCFileHandler():
 
         with open(file_name, 'rb+') as current_file:
             self.ProcessHeader(current_file)
-            for line in self.generator(current_file):
+
+            for line in self.io_generator().decrypt(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -78,7 +95,8 @@ class VCFileHandler():
 
         with open(file_name, 'rb+') as current_file:
             self.ProcessHeader(current_file)
-            for line in self.generator(current_file):
+
+            for line in self.io_generator().decrypt(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -94,8 +112,13 @@ class VCFileHandler():
         file_name = vim.current.buffer.name
 
         with open(file_name, 'wb+') as current_file:
+            print("LOL", )
             self.WriteHeader(current_file)
-            for line in GhettoGenerator(vim.current.buffer):
+            print("LOL2", )
+
+            for idx, line in enumerate(self.io_generator().encrypt(vim.current.buffer)):
+                print("LOL3", )
+                print(idx, line, )
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
@@ -112,7 +135,9 @@ class VCFileHandler():
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
         with open(file_name, 'wb+') as current_file:
-            for line in GhettoGenerator(current_range):
+            self.WriteHeader(current_file)
+
+            for line in self.io_generator().encrypt(current_range):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
@@ -128,7 +153,9 @@ class VCFileHandler():
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
         with open(file_name, 'ab') as current_file:
-            for line in GhettoGenerator(current_range):
+            self.WriteHeader(current_file)
+
+            for line in self.io_generator().encrypt(current_range):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
