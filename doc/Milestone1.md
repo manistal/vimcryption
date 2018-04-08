@@ -1,15 +1,15 @@
 # Outline
 
-##Abstract
+## Abstract
 - Encryption plugin for VIM.
 
-##Introduction
+## Introduction
 - VIM's existing encryption functionality is limited in configuration options.
 
-##Background and/or Related Work
+## Background and/or Related Work
 - VIM -x
 
-##Methodology
+## Methodology
 - Setup VIM disk access hooks
     - File Read
     - Buffer Read
@@ -22,7 +22,7 @@
         - decrypt(file)
 - Add Password or Key support
 
-##Resources
+## Resources
 
 - Learn VimScript the Hard Way `http://learnvimscriptthehardway.stevelosh.com/chapters/53.html`
 - Vim Documentation: Autocmd `http://vimdoc.sourceforge.net/htmldoc/autocmd.html`
