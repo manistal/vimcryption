@@ -1,8 +1,11 @@
+"""
 
+"""
 import vim
 import os
 import binascii
 from base64 import b64decode, b64encode
+
 
 def GhettoGenerator(text_sequence):
     """ To be replaced by our actual encryptor/decryptors
@@ -12,9 +15,12 @@ def GhettoGenerator(text_sequence):
     for line in text_sequence:
         yield line
 
+<<<<<<< HEAD
 Decryptor = GhettoGenerator
 Encryptor = GhettoGenerator
 Plaintext = GhettoGenerator
+=======
+>>>>>>> 7d3db178e74f091c365e7f31c1221a5e94c88f1e
 
 class VCFileHandler():
     def __init__(self, config=None):
