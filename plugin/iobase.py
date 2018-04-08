@@ -27,10 +27,16 @@ class IOPassThrough:
         # type: (Union[List[str], str]) -> Union[List[str], str]:
         if isinstance(data, str):
             yield data
-        iter(data)
+
+        else:
+            for line in iter(data):
+                yield line
 
     def decrypt(self, data):
         # type: (Union[List[str], str]) -> Union[List[str], str]:
         if isinstance(data, str):
             yield data
-        iter(data)
+
+        else:
+            for line in iter(data):
+                yield line
