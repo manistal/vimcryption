@@ -58,8 +58,6 @@ class VCFileHandler():
     def WriteHeader(self, file_handle):
         file_handle.write(b64encode('vimcrypted'))
         file_handle.write(b64encode('IOPASS'))
-        print("IOPASS",b64encode('IOPASS'))
-
 
     def BufRead(self):
         """
@@ -112,13 +110,9 @@ class VCFileHandler():
         file_name = vim.current.buffer.name
 
         with open(file_name, 'wb+') as current_file:
-            print("LOL", )
             self.WriteHeader(current_file)
-            print("LOL2", )
 
-            for idx, line in enumerate(self.io_generator().encrypt(vim.current.buffer)):
-                print("LOL3", )
-                print(idx, line, )
+            for line in self.io_generator().encrypt(vim.current.buffer):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
