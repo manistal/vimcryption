@@ -22,6 +22,13 @@ class VCFileHandler():
         if config:
             self.config = config
 
+    def DisableVC(self):
+        file_handle.seek(0) # its not ours, reset
+        self.io_generator = IOPassThrough
+        # TODO: might want to run a vim command to unregister us if its not our file
+        #       can then have a different command hook to reregister for enables
+        # vim.command("unloadVimcryption")
+
     def ProcessHeader(self, file_handle):
         """ Process vimcryption header
             @param file_handle expects file-like bytes object
@@ -33,27 +40,24 @@ class VCFileHandler():
             # First check to see if we should be handling it 
             header_valid = b64decode(file_handle.read(16))
             if (header_valid != 'vimcrypted'):
-                # Not encrypted, just pass data through 
-                # TODO: might want to run a vim command to unregister us if its not our file
-                #       can then have a different command hook to reregister for enables
-                file_handle.seek(0) # its not ours, reset
-                self.io_generator = IOPassThrough
-                return 
+                return self.DisableVC(file_handle)
 
 
             # Which cipher
             header_cipher = b64decode(file_handle.read(8))
             self.io_generator = self._CIPHER_GEN_MAP_[header_cipher]
 
-            # if self.io_generator_needs_key()
-            # header_haskey = file_handle.read(64)
-            
 
-        except TypeError as e:
-            file_handle.seek(0) # its not ours, reset
+        except TypeError as err:
+            self.DisableVC()
 
-        except binascii.Error as e:
+        except binascii.Error as err:
+            self.DisableVC()
+
+        except KeyError as err:
+            self.DisableVC()
             file_handle.seek(0) # not ours, python3 support
+            file_handle.seek(0) # nonexistant cipher requested
 
     def WriteHeader(self, file_handle):
         file_handle.write(b64encode('vimcrypted'))
