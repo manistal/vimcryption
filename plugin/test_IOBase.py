@@ -12,11 +12,19 @@ class TestIOBase(unittest.TestCase):
     """
     Unit tests for iobase.IOBase
     """
-    def test_encrypt(self):
+    def test_encrypt_str(self):
         with self.assertRaises(NotImplementedError):
             iobase.IOBase().encrypt("rawr")
 
-    def test_decrypt(self):
+    def test_encrypt_list(self):
+        with self.assertRaises(NotImplementedError):
+            iobase.IOBase().encrypt(["r", "a", "w", "r"])
+
+    def test_decrypt_list(self):
+        with self.assertRaises(NotImplementedError):
+            iobase.IOBase().decrypt(["r", "a", "w", "r"])
+
+    def test_decrypt_str(self):
         with self.assertRaises(NotImplementedError):
             iobase.IOBase().decrypt("rawr")
 
@@ -36,13 +44,15 @@ class TestIOPassThrough(unittest.TestCase):
         self.assertEqual(test_string, iobase.IOPassThrough().encrypt(test_string).next())
 
     def test_encrypt_list(self):
-        for instr, outstr in zip(self.test_strings, iobase.IOPassThrough().encrypt([s for s in self.test_strings])):
-            self.assertEqual(instr, outstr)
+        # Get a list of the encrypted strings
+        encrypted_strings = [item for item in iobase.IOPassThrough().encrypt([s for s in self.test_strings])]
+        self.assertEqual(self.test_strings, encrypted_strings)
 
     def test_decrypt_str(self):
         test_string = self.test_strings[0]
         self.assertEqual(test_string, iobase.IOPassThrough().decrypt(test_string).next())
 
     def test_decrypt_list(self):
-        for instr, outstr in zip(self.test_strings, iobase.IOPassThrough().decrypt([s for s in self.test_strings])):
-            self.assertEqual(instr, outstr)
+        # Get a list of the decrypted strings
+        decrypted_strings = [item for item in iobase.IOPassThrough().decrypt([s for s in self.test_strings])]
+        self.assertEqual(self.test_strings, decrypted_strings)
