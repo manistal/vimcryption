@@ -13,6 +13,14 @@ def GhettoGenerator(text_sequence):
     for line in text_sequence:
         yield line
 
+"""
+TODO:
+When using an external program, be certain to turn off options like 
+    persistent undo (:help 'undofile'), 
+    backup files (:help 'backup'), 
+    swap files (:help 'swapfile'), and 
+    .viminfo file (:help 'viminfo'),i
+"""
 
 class VCFileHandler():
     def __init__(self, config=None):
