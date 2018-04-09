@@ -19,7 +19,7 @@ class IOBase:
         raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
 
 
-class IOPassThrough:
+class IOPassThrough(IOBase):
     """
     Simple pass-through IO object.
     """
