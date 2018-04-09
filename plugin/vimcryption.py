@@ -7,6 +7,14 @@ import binascii
 from base64 import b64decode, b64encode
 from iobase import IOPassThrough
 
+"""
+TODO:
+When using an external program, be certain to turn off options like 
+    persistent undo (:help 'undofile'), 
+    backup files (:help 'backup'), 
+    swap files (:help 'swapfile'), and 
+    .viminfo file (:help 'viminfo'),i
+"""
 
 class VCFileHandler():
     _CIPHER_GEN_MAP_ = {
