@@ -2,9 +2,9 @@
 """
 
 
-class IOBase:
+class EncryptionEngine:
     """
-    Base vimcryption IO object.
+    Base vimcryption encryption engine object.
     """
 
     def __init__(self):
@@ -19,9 +19,9 @@ class IOBase:
         raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
 
 
-class IOPassThrough(IOBase):
+class PassThrough(EncryptionEngine):
     """
-    Simple pass-through IO object.
+    Simple pass-through engine object.
     """
     def encrypt(self, data):
         # type: (Union[List[str], str]) -> Union[List[str], str]:
