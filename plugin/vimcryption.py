@@ -5,36 +5,41 @@ import vim
 import os
 import binascii
 from base64 import b64decode, b64encode
-from iobase import IOPassThrough
 
+from vcengine import PassThrough, Base64Engine
 
 class VCFileHandler():
     _CIPHERS = {
-        'IOPASS' : IOPassThrough, 
-        'BASE64' : IOPassThrough, 
-        'AES128' : IOPassThrough, 
-        'AES256' : IOPassThrough
+        'IOPASS' : PassThrough, 
+        'BASE64' : Base64Engine, 
+        'AES128' : PassThrough, 
+        'AES256' : PassThrough
     }
 
     def __init__(self, config=None):
+        """
+        Configurations:
+        g:vimcryption_cipher_type   Entry in self._CIPHERS for Engine setting
+        """
         self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher_type', \"IOPASS\")")
-        self.cipher_gen = self._CIPHERS.get(self.cipher_type, IOPassThrough) 
+        self.cipher_engine = self._CIPHERS.get(self.cipher_type, PassThrough) 
 
         if self.cipher_type not in self._CIPHERS:
             self.cipher_type = "IOPASS"
 
 
     def DisableVC(self, file_handle):
+        """ Disable Vimcryption Engine and Reset File Pointer """
         file_handle.seek(0) 
         vim.command("call UnloadVimcryption()")
-        self.cipher_gen = IOPassThrough
+        self.cipher_engine = PassThrough
 
     def ProcessHeader(self, file_handle):
         """ Process vimcryption header
             @param file_handle expects file-like bytes object
             0:15 (16)  bytes - b64encode of "vimcryption" if the file is our type
             16:23 (8)  bytes - b64encode of cipher, always 6 chars (AES128, AES256, BASE64, IOPASS)
-            24:88 (64) bytes - sha256 hash of key/password for file (optional)
+            24:X  (X)  bytes - [optional]  - Engine may process additional metadata 
         """
         try:
             # First check to see if we should be handling it 
@@ -44,7 +49,7 @@ class VCFileHandler():
 
             # Setup the cipher IO for encrypt/decrypt 
             header_cipher = b64decode(file_handle.read(8))
-            self.cipher_gen = self._CIPHERS[header_cipher]
+            self.cipher_engine = self._CIPHERS[header_cipher]
             self.cipher_type = header_cipher
 
         # Python2 Padding Error
@@ -80,7 +85,7 @@ class VCFileHandler():
         with open(file_name, 'rb+') as current_file:
             self.ProcessHeader(current_file)
 
-            for line in self.cipher_gen().decrypt(current_file):
+            for line in self.cipher_engine().decrypt(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -101,7 +106,7 @@ class VCFileHandler():
         with open(file_name, 'rb+') as current_file:
             self.ProcessHeader(current_file)
 
-            for line in self.cipher_gen().decrypt(current_file):
+            for line in self.cipher_engine().decrypt(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -119,7 +124,7 @@ class VCFileHandler():
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
 
-            for line in self.cipher_gen().encrypt(vim.current.buffer):
+            for line in self.cipher_engine().encrypt(vim.current.buffer):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
@@ -138,7 +143,7 @@ class VCFileHandler():
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
 
-            for line in self.cipher_gen().encrypt(current_range):
+            for line in self.cipher_engine().encrypt(current_range):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
@@ -156,7 +161,7 @@ class VCFileHandler():
         with open(file_name, 'ab') as current_file:
             self.WriteHeader(current_file)
 
-            for line in self.cipher_gen().encrypt(current_range):
+            for line in self.cipher_engine().encrypt(current_range):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
