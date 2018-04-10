@@ -1,12 +1,30 @@
-# vimcryption
+# Vimcryption
 
 Encryption plugin for VIM.
+
+# Commands and Setup 
+
+In your .vimrc
+```
+let g:vimcryption_cipher_type = "AES128"
+```
+
+Disable/Enable:
+```
+:Vimcrypt
+:NoVimcrypt
+```
 
 ## Links 
 
 https://robertbasic.com/blog/import-custom-python-modules-in-vim-plugins/
 
 https://www.ibm.com/developerworks/library/l-vim-script-5/index.html
+
+## Unit Tests
+
+- Requires virtualenv already installed
+- Requires NO SPACES in file pathing (gg pip rip)
 
 ### Intercept all File Reads and Writes
 
