@@ -57,17 +57,17 @@ The Python based file handler is connstructed at the same time the auto-commands
 
 ## Resources
 
-[1] Losh, Steve. "Learn Vimscript the Hard Way." Learn Vimscript the Hard Way. Accessed March 08, 2018.
+[1] Losh, Steve. "Learn Vimscript the Hard Way." Learn Vimscript the Hard Way. Accessed March 08, 2018.   
 http://learnvimscriptthehardway.stevelosh.com/.
 
-[2] "Vim Documentation: Autocmd" vimdoc. Accessed March 08, 2018. 
+[2] "Vim Documentation: Autocmd" vimdoc. Accessed March 08, 2018.    
 http://vimdoc.sourceforge.net/htmldoc/autocmd.htm 
 
-[3] "Vim Documentation: Python Module" vimdoc. Accessed March 08, 2018. 
+[3] "Vim Documentation: Python Module" vimdoc. Accessed March 08, 2018.   
 http://vimdoc.sourceforge.net/htmldoc/if_pyth.htm 
 
-[4] "Encryption" Vim Tips Wiki. Accessed March 08, 2018.
+[4] "Encryption" Vim Tips Wiki. Accessed March 08, 2018.   
 http://vim.wikia.com/wiki/Encryption
 
-[5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.
+[5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.   
 https://github.com/vim-scripts/gnupg.vim
