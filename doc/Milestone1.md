@@ -1,7 +1,7 @@
 # Outline
 
 ## Abstract
-- Encryption plugin for VIM.
+The prospect of writing a cryptographic application started out simply; code something up capable of encrypting and decrypting content.  The idea of encrypting messages quickly expanded into encryption of notes, or entire files.  This generalization of target content led us to the idea of a platform-independent editor plugin that could handle encryption of arbitrary data.  The choice of editor was then clear: VIM. It runs on many platforms and can execute Python through it's vimconfig and plugin interfaces.  This plugin intercepts all disk access from the editor, ensuring that all externally observable data is put through an encryption engine before being writte, including temporary files.
 
 ## Introduction
 - VIM's existing encryption functionality is limited in configuration options.
@@ -24,8 +24,8 @@ We also searched `https://vimawesome.com/`, the largest directory of vim plugins
     - File Append
 - Define Encrypt and Decrypt API
     - EncryptionEngine
-        - encrypt(buffer)
-        - decrypt(file)
+        - encrypt(buffer, file)
+        - decrypt(file, buffer)
 - Add Password or Key support
 
 ## Resources
