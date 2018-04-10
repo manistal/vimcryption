@@ -16,7 +16,7 @@ class VCFileHandler():
         'AES256' : PassThrough
     }
 
-    def __init__(self, config=None):
+    def __init__(self):
         """
         Configurations:
         g:vimcryption_cipher_type   Entry in self._CIPHERS for Engine setting
