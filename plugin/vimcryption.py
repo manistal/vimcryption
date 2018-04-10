@@ -7,17 +7,9 @@ import binascii
 from base64 import b64decode, b64encode
 from iobase import IOPassThrough
 
-"""
-TODO:
-When using an external program, be certain to turn off options like 
-    persistent undo (:help 'undofile'), 
-    backup files (:help 'backup'), 
-    swap files (:help 'swapfile'), and 
-    .viminfo file (:help 'viminfo'),i
-"""
 
 class VCFileHandler():
-    _CIPHER_GEN_MAP_ = {
+    _CIPHERS = {
         'IOPASS' : IOPassThrough, 
         'BASE64' : IOPassThrough, 
         'AES128' : IOPassThrough, 
@@ -25,17 +17,17 @@ class VCFileHandler():
     }
 
     def __init__(self, config=None):
-        self.io_generator = IOPassThrough
+        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher_type', \"IOPASS\")")
+        self.cipher_gen = self._CIPHERS.get(self.cipher_type, IOPassThrough) 
 
-        if config:
-            self.config = config
+        if self.cipher_type not in self._CIPHERS:
+            self.cipher_type = "IOPASS"
 
-    def DisableVC(self):
-        file_handle.seek(0) # its not ours, reset
-        self.io_generator = IOPassThrough
-        # TODO: might want to run a vim command to unregister us if its not our file
-        #       can then have a different command hook to reregister for enables
-        # vim.command("unloadVimcryption")
+
+    def DisableVC(self, file_handle):
+        file_handle.seek(0) 
+        vim.command("call UnloadVimcryption()")
+        self.cipher_gen = IOPassThrough
 
     def ProcessHeader(self, file_handle):
         """ Process vimcryption header
@@ -50,26 +42,29 @@ class VCFileHandler():
             if (header_valid != 'vimcrypted'):
                 return self.DisableVC(file_handle)
 
-
-            # Which cipher
+            # Setup the cipher IO for encrypt/decrypt 
             header_cipher = b64decode(file_handle.read(8))
-            self.io_generator = self._CIPHER_GEN_MAP_[header_cipher]
+            self.cipher_gen = self._CIPHERS[header_cipher]
+            self.cipher_type = header_cipher
 
-
+        # Python2 Padding Error
         except TypeError as err:
-            self.DisableVC()
+            self.DisableVC(file_handle)
 
+        # Python3 Padding Error 
         except binascii.Error as err:
-            self.DisableVC()
+            self.DisableVC(file_handle)
 
+        # Unsupported Cipher
         except KeyError as err:
-            self.DisableVC()
-            file_handle.seek(0) # not ours, python3 support
-            file_handle.seek(0) # nonexistant cipher requested
+            print("Unsupported Cipher: " + header_cipher)
+            self.DisableVC(file_handle)
+
 
     def WriteHeader(self, file_handle):
+        file_handle.seek(0) # Always start at the begginning
         file_handle.write(b64encode('vimcrypted'))
-        file_handle.write(b64encode('IOPASS'))
+        file_handle.write(b64encode(self.cipher_type))
 
     def BufRead(self):
         """
@@ -85,7 +80,7 @@ class VCFileHandler():
         with open(file_name, 'rb+') as current_file:
             self.ProcessHeader(current_file)
 
-            for line in self.io_generator().decrypt(current_file):
+            for line in self.cipher_gen().decrypt(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -106,7 +101,7 @@ class VCFileHandler():
         with open(file_name, 'rb+') as current_file:
             self.ProcessHeader(current_file)
 
-            for line in self.io_generator().decrypt(current_file):
+            for line in self.cipher_gen().decrypt(current_file):
                 vim.current.buffer.append(line)
 
         # Vim adds an extra line at the top of the buffer 
@@ -124,7 +119,7 @@ class VCFileHandler():
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
 
-            for line in self.io_generator().encrypt(vim.current.buffer):
+            for line in self.cipher_gen().encrypt(vim.current.buffer):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
@@ -143,7 +138,7 @@ class VCFileHandler():
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
 
-            for line in self.io_generator().encrypt(current_range):
+            for line in self.cipher_gen().encrypt(current_range):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
@@ -161,7 +156,7 @@ class VCFileHandler():
         with open(file_name, 'ab') as current_file:
             self.WriteHeader(current_file)
 
-            for line in self.io_generator().encrypt(current_range):
+            for line in self.cipher_gen().encrypt(current_range):
                 current_file.write(line + "\n")
 
         vim.command(':set nomodified')
