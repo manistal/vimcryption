@@ -8,7 +8,7 @@ Any encryption plugin needs to be flexibly architected so that it can keep up wi
 
 - VIM's existing encryption functionality is limited in configuration options.
 
-The encryption library is based on Encryption Engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through EncryptionEngine.decrypt(file_descriptor, buffer) and disk writes through EncryptionEngine.encrypt(buffer, file_descriptor).
+The encryption library is based on encryption engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through `EncryptionEngine.decrypt` and disk writes through `EncryptionEngine.encrypt`.
 
 ## Background 
 
@@ -26,11 +26,10 @@ We also searched `https://vimawesome.com/`, the largest directory of vim plugins
     - File Write
     - Buffer Write
     - File Append
-- Define Encrypt and Decrypt API
-    - EncryptionEngine
-        - encrypt(buffer, file)
-        - decrypt(file, buffer)
-- Add Password or Key support
+
+The encryption API was defined and encoded into an abstract base class called `EncryptionEngine`.  The API requires any `EncryptionEngine` to define two methods, `encrypt(buffer, file_handle)` and `decrypt(file_handle, buffer)`.  `encrypt` takes a VIM buffer and applies encryption to it before writing it to the file handle.  `decrypt` takes a file handle which it reads and decrypts into a VIM buffer.  We set up a unit test environment using Python 2.7 and 3.4 with `nose2` to test the `EncryptionEngine`s.  A virtual environment is created for both Python versions, `vimcryption` is installed in each and then the test suite is run.  Each engine is tested to ensure that it's encrypt/decrypt functions match the algorithm they are supposed to implement.  Once the disk access hooks were configured, a pass-through engine was implemented to test the connection.  This `PassThroughEngine` simply writes buffer contents to the file and vice versa, but proved that the paradigm would work.  With the architecture proven, we needed an engine that actually modified file contents on disk.  To start, a simple keyless base64 encoding was used to scramble the contents.
+
+With the framework set up and doing simple encryption, continued development will be focused on implementing additional testing and encryption schemes.  VIM configuration and installation unit tests are needed to ensure compatibility isn't affected by any future changes.  A pure python implementation of AES128 will allow passkey based encryption in an easily delivered, cross-platform package.
 
 ## Resources
 
