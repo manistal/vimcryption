@@ -14,6 +14,7 @@ Vim, despite being one of the leading text editors in system administration and 
 The encryption library is based on encryption engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through `EncryptionEngine.decrypt` and disk writes through `EncryptionEngine.encrypt`.
 
 <div style="page-break-after: always;"></div>
+
 ### Background 
 
 Vim provides some builtin encryption functionality that can be used with the `-x` argument on the commandline and `:X` command in Vim, which both will prompt you for a key with which to encrypt the file. Vim supports 3 ciphers (`Pkzip`, `blowfish`, and `blowfish2`) and by default will use `Pkzip` which the `:help encryption` documentation in vim describes as "The algorithm used is breakable. A 4 character key in about one hour, a 6 character key in one day (on a Pentium 133 PC).". Blowfish is also compromised but fixed in blowfish2. Blowfish2 provides strong encryption but is vunerable to undetected modification. [4] 
@@ -53,6 +54,7 @@ The `py` command used in the snippet above is the result of builtin Python plugi
 The encryption API was defined and encoded into an abstract base class called `EncryptionEngine`.  The API requires any `EncryptionEngine` to define two methods, `encrypt(buffer, file_handle)` and `decrypt(file_handle, buffer)`.  `encrypt` takes a VIM buffer and applies encryption to it before writing it to the file handle.  `decrypt` takes a file handle which it reads and decrypts into a VIM buffer.  We set up a unit test environment using Python 2.7 and 3.4 with `nose2`[6] to test the `EncryptionEngine`s.  A virtual environment is created for both Python versions, `vimcryption` is installed in each and then the test suite is run.  Each engine is tested to ensure that it's encrypt/decrypt functions match the algorithm they are supposed to implement.  Once the disk access hooks were configured, a pass-through engine was implemented to test the connection.  This `PassThroughEngine` simply writes buffer contents to the file and vice versa, but proved that the paradigm would work.  With the architecture proven, we needed an engine that actually modified file contents on disk.  To start, a simple keyless base64 encoding[7] was used to scramble the contents.
 
 <div style="page-break-after: always;"></div>
+
 ### Resources
 
 [1] Losh, Steve. "Learn Vimscript the Hard Way." Learn Vimscript the Hard Way. Accessed March 08, 2018.
