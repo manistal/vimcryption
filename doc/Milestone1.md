@@ -9,7 +9,7 @@ The prospect of writing a cryptographic application started out simply; code som
 ## Introduction
 Any encryption plugin needs to be flexibly architected so that it can keep up with the cryptographic arms race. To support this, we identified two main areas of development. The first is the VIM interface, which describes to the editor what our library will be responsible for. The second is an extensible encryption library that can handle file IO.
 
-Vim, despite being one of the leading text editors in system administration and development, notably lacks extensible cross platform encyrption functionality. Builtin solutions use weak ciphers and developer provided recepies are based on a Gnu specific dependancy. Vimcryption addresses this need by providing an API to load and select self-contained ciphers at runtime. 
+Vim, despite being one of the leading text editors in system administration and development, notably lacks extensible cross platform encyrption functionality. Builtin solutions use weak ciphers and developer provided recepies are based on a Gnu specific dependancy. Vimcryption addresses this need by providing a Vimscript to Python API to load and select self-contained ciphers at runtime. 
 
 The encryption library is based on encryption engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through `EncryptionEngine.decrypt` and disk writes through `EncryptionEngine.encrypt`.
 
