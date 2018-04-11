@@ -27,7 +27,7 @@ We also searched `https://vimawesome.com/`, the largest directory of vim plugins
     - Buffer Write
     - File Append
 
-The encryption API was defined and encoded into an abstract base class called `EncryptionEngine`.  The API requires any `EncryptionEngine` to define two methods, `encrypt(buffer, file_handle)` and `decrypt(file_handle, buffer)`.  `encrypt` takes a VIM buffer and applies encryption to it before writing it to the file handle.  `decrypt` takes a file handle which it reads and decrypts into a VIM buffer.  We set up a unit test environment using Python 2.7 and 3.4 with `nose2` to test the `EncryptionEngine`s.  A virtual environment is created for both Python versions, `vimcryption` is installed in each and then the test suite is run.  Each engine is tested to ensure that it's encrypt/decrypt functions match the algorithm they are supposed to implement.  Once the disk access hooks were configured, a pass-through engine was implemented to test the connection.  This `PassThroughEngine` simply writes buffer contents to the file and vice versa, but proved that the paradigm would work.  With the architecture proven, we needed an engine that actually modified file contents on disk.  To start, a simple keyless base64 encoding was used to scramble the contents.
+The encryption API was defined and encoded into an abstract base class called `EncryptionEngine`.  The API requires any `EncryptionEngine` to define two methods, `encrypt(buffer, file_handle)` and `decrypt(file_handle, buffer)`.  `encrypt` takes a VIM buffer and applies encryption to it before writing it to the file handle.  `decrypt` takes a file handle which it reads and decrypts into a VIM buffer.  We set up a unit test environment using Python 2.7 and 3.4 with `nose2`[6] to test the `EncryptionEngine`s.  A virtual environment is created for both Python versions, `vimcryption` is installed in each and then the test suite is run.  Each engine is tested to ensure that it's encrypt/decrypt functions match the algorithm they are supposed to implement.  Once the disk access hooks were configured, a pass-through engine was implemented to test the connection.  This `PassThroughEngine` simply writes buffer contents to the file and vice versa, but proved that the paradigm would work.  With the architecture proven, we needed an engine that actually modified file contents on disk.  To start, a simple keyless base64 encoding[7] was used to scramble the contents.
 
 With the framework set up and doing simple encryption, continued development will be focused on implementing additional testing and encryption schemes.  VIM configuration and installation unit tests are needed to ensure compatibility isn't affected by any future changes.  A pure python implementation of AES128 will allow passkey based encryption in an easily delivered, cross-platform package.
 
@@ -47,3 +47,9 @@ http://vim.wikia.com/wiki/Encryption
 
 [5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.
 https://github.com/vim-scripts/gnupg.vim
+
+[6] Pellerin et al. "nose2" (17 Feb 2018) GitHub Repository.
+https://github.com/nose-devs/nose2
+
+[7] "Base64" Wikipedia. Accessed 10 April 2018
+https://en.wikipedia.org/wiki/Base64
