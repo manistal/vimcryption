@@ -4,7 +4,11 @@
 The prospect of writing a cryptographic application started out simply; code something up capable of encrypting and decrypting content.  The idea of encrypting messages quickly expanded into encryption of notes, or entire files.  This generalization of target content led us to the idea of a platform-independent editor plugin that could handle encryption of arbitrary data.  The choice of editor was clear: VIM. It runs on many platforms and can execute Python through it's vimconfig and plugin interfaces.  This plugin registers file io handling functions with VIM which replace the default ones.  All disk access from the editor is thus routed through this plugin, ensuring that all externally observable data is put through an encryption engine, including temporary files.
 
 ## Introduction
+Any encryption plugin needs to be flexibly architected so that it can keep up with the cryptographic arms race.  To support this, we identified two main areas of development.  The first is the VIM interface, which describes to the editor what our library will be responsible for.  The second is an extensible encryption library that can handle file IO.
+
 - VIM's existing encryption functionality is limited in configuration options.
+
+The encryption library is based on Encryption Engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through EncryptionEngine.decrypt(file_descriptor, buffer) and disk writes through EncryptionEngine.encrypt(buffer, file_descriptor).
 
 ## Background 
 
