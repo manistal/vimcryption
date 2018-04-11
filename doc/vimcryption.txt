@@ -1,8 +1,0 @@
-Vimcryption is a plugin that allows you to encryption your files 
-
-:set vimcryption enables vimcryption for the given file
-:set novimcryption disables vimcryption for the given file
-
-Add :set vimcryption to your .vimrc to encrypt all files
-
-:vimcryption addkey  - Allows you to add others rsa_id.pub keys to your environment
