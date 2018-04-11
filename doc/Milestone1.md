@@ -1,7 +1,7 @@
 # Project Milestone for Vimcryption
 
-Authors: Tom Manner, Miguel Nistal 
-MSCS630 Spring 2018
+_Authors: Tom Manner, Miguel Nistal_   
+_MSCS630 Spring 2018_   
 
 ## Abstract
 The prospect of writing a cryptographic application started out simply; code something up capable of encrypting and decrypting content.  The idea of encrypting messages quickly expanded into encryption of notes, or entire files.  This generalization of target content led us to the idea of a platform-independent editor plugin that could handle encryption of arbitrary data.  The choice of editor was clear: VIM. It runs on many platforms and can execute Python through it's vimconfig and plugin interfaces.  This plugin registers file io handling functions with VIM which replace the default ones.  All disk access from the editor is thus routed through this plugin, ensuring that all externally observable data is put through an encryption engine, including temporary files.
