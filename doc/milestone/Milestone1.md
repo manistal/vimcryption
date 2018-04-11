@@ -1,7 +1,8 @@
 # Project Milestone for Vimcryption
 
-_Authors: Tom Manner, Miguel Nistal_
-_MSCS630 Spring 2018_
+_Authors: Tom Manner, Miguel Nistal_    
+_MSCS630 Spring 2018_   
+https://github.com/tsmanner/vimcryption   
 
 ### Abstract
 The prospect of writing a cryptographic application started out simply; code something up capable of encrypting and decrypting content.  The idea of encrypting messages quickly expanded into encryption of notes, or entire files.  This generalization of target content led us to the idea of a platform-independent editor plugin that could handle encryption of arbitrary data.  The choice of editor was clear: VIM. It runs on many platforms and can execute Python through it's vimconfig and plugin interfaces.  This plugin registers file io handling functions with VIM which replace the default ones.  All disk access from the editor is thus routed through this plugin, ensuring that all externally observable data is put through an encryption engine, including temporary files.
@@ -12,8 +13,6 @@ Any encryption plugin needs to be flexibly architected so that it can keep up wi
 Vim, despite being one of the leading text editors in system administration and development, notably lacks extensible cross platform encyrption functionality. Builtin solutions use weak ciphers and developer provided recepies are based on a Gnu specific dependancy. Vimcryption addresses this need by providing a Vimscript to Python API to load and select self-contained ciphers at runtime. 
 
 The encryption library is based on encryption engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through `EncryptionEngine.decrypt` and disk writes through `EncryptionEngine.encrypt`.
-
-<div style="page-break-after: always;"></div>
 
 ### Background 
 
@@ -30,24 +29,20 @@ In it's role as a text editor, Vim is directly responsible for all the file oper
 
 Securing the unintential leak of plaintext data via temporary files is relatively simple in Vim. As discussed in the Vim Tips Wiki, we can disable the creation of temporary files by using vim-script in our plugin load [4]:
 
-```
     setl noswapfile
     setl noundofile
     setl nobackup
     set viminfo=
-```
 
 It's important to note that the above commands use the `setl` syntax which means "set local to the buffer". Since we want users to be able to work on encrypted and unencryted files simultaneously, we need to ensure that any plugin configurations don't effect other active files. 
 
 Intercepting the actual reading and writing of the buffer is directly supported by Vim through through the use of Command-Events, which are specialized Auto-Commands that specifically allow the overloading of filesystem triggers. [2] We can then tie these file system triggers to event handlers in Python and write/read the file system and buffer directly through a file handler there. 
 
-```
     au BufReadCmd    *    py VCF.BufRead()
     au FileReadCmd   *    py VCF.FileRead()
     au BufWriteCmd   *    py VCF.BufWrite()
     au FileWriteCmd  *    py VCF.FileWrite()
     au FileAppendCmd *    py VCF.FileAppend()
-```
 
 The `py` command used in the snippet above is the result of builtin Python plugin support provided by Vim. When Vim loads, it instantiates an interpreter process which is active throughout the lifetime of the application. This behavior allows our plugin libraries to maintain state in between calls, so we can read user configurations at plugin load time for defaults and file meta-data during `FileRead`/`BufRead`. Based on the settings and meta-data, the File Handler will instantiate an engine from the encryption API to process the text.
 
@@ -59,23 +54,23 @@ With the framework set up and doing simple encryption, continued development wil
 
 ### Resources
 
-[1] Losh, Steve. "Learn Vimscript the Hard Way." Learn Vimscript the Hard Way. Accessed March 08, 2018.
+[1] Losh, Steve. "Learn Vimscript the Hard Way." Learn Vimscript the Hard Way.   
 http://learnvimscriptthehardway.stevelosh.com/.
 
-[2] "Vim Documentation: Autocmd" vimdoc. Accessed March 08, 2018.
+[2] "Vim Documentation: Autocmd" vimdoc.   
 http://vimdoc.sourceforge.net/htmldoc/autocmd.htm 
 
-[3] "Vim Documentation: Python Module" vimdoc. Accessed March 08, 2018.
+[3] "Vim Documentation: Python Module" vimdoc.   
 http://vimdoc.sourceforge.net/htmldoc/if_pyth.htm 
 
-[4] "Encryption" Vim Tips Wiki. Accessed March 08, 2018.
+[4] "Encryption" Vim Tips Wiki.   
 http://vim.wikia.com/wiki/Encryption
 
-[5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.
+[5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.    
 https://github.com/vim-scripts/gnupg.vim
 
-[6] Pellerin et al. "nose2" (17 Feb 2018) GitHub Repository.
+[6] Pellerin et al. "nose2" (17 Feb 2018) GitHub Repository.    
 https://github.com/nose-devs/nose2
 
-[7] "Base64" Wikipedia. Accessed 10 April 2018.
+[7] "Base64" Wikipedia.   
 https://en.wikipedia.org/wiki/Base64
