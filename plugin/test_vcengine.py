@@ -2,6 +2,7 @@
 """
 
 import base64
+import io
 import random
 import string
 import unittest
@@ -41,21 +42,34 @@ class TestPassThrough(unittest.TestCase):
         ]
 
     def test_encrypt_str(self):
+        fh = io.BytesIO()
         test_string = self.test_strings[0]
-        self.assertEqual(test_string, vcengine.PassThrough().encrypt(test_string).next())
+        vcengine.PassThrough().encrypt(test_string, fh)
+        self.assertEqual(test_string, fh.get_value().decode())
 
     def test_encrypt_list(self):
-        # Get a list of the encrypted strings
-        encrypted_strings = [item for item in vcengine.PassThrough().encrypt([s for s in self.test_strings])]
-        self.assertEqual(self.test_strings, encrypted_strings)
+        # Encrypt the list of strings into a single document.
+        fh = io.BytesIO()
+        vcengine.PassThrough().encrypt(self.test_strings, fh)
+        # Get the encrypted document, split it on newline and compare.
+        decrypted_strings = fh.get_value().decode().split("\n")
+        self.assertEqual(self.test_strings, decrypted_strings)
 
     def test_decrypt_str(self):
+        fh = io.BytesIO()
         test_string = self.test_strings[0]
-        self.assertEqual(test_string, vcengine.PassThrough().decrypt(test_string).next())
+        fh.write(bytes(test_string, "utf8"))
+        decrypted_strings = []
+        vcengine.PassThrough().decrypt(fh, decrypted_strings)
+        self.assertEqual(test_string, decrypted_strings[0])
 
     def test_decrypt_list(self):
-        # Get a list of the decrypted strings
-        decrypted_strings = [item for item in vcengine.PassThrough().decrypt([s for s in self.test_strings])]
+        # Write all test strings to the file handle, newline separated
+        fh = io.BytesIO()
+        fh.write(bytes("\n".join(self.test_strings), "utf8"))
+        decrypted_strings = []
+        # Decrypt the file handle into a list and compare
+        vcengine.PassThrough().decrypt(fh, decrypted_strings)
         self.assertEqual(self.test_strings, decrypted_strings)
 
 
@@ -70,19 +84,31 @@ class TestBase64Engine(unittest.TestCase):
         ]
 
     def test_encrypt_str(self):
+        fh = io.BytesIO()
         test_string = self.test_strings[0]
-        self.assertEqual(base64.b64encode(test_string), vcengine.Base64Engine().encrypt(test_string).next())
+        vcengine.Base64Engine().encrypt(test_string, fh)
+        encrypted_string = fh.get_value().decode()
+        self.assertEqual(base64.b64encode(test_string), encrypted_string)
 
     def test_encrypt_list(self):
+        fh = io.BytesIO()
         # Get a list of the encrypted strings
-        encrypted_strings = [base64.b64decode(item) for item in vcengine.Base64Engine().encrypt([s for s in self.test_strings])]
-        self.assertEqual(self.test_strings, encrypted_strings)
+        vcengine.Base64Engine().encrypt(self.test_strings, fh)
+        decrypted_strings = base64.b64decode(fh.get_value()).split("\n")
+        self.assertEqual(self.test_strings, decrypted_strings)
 
     def test_decrypt_str(self):
+        fh = io.BytesIO()
         test_string = self.test_strings[0]
-        self.assertEqual(test_string, vcengine.Base64Engine().decrypt(base64.b64encode(test_string)).next())
+        fh.write(base64.b64encode(bytes(test_string, "utf8")))
+        decrypted_strings = []
+        vcengine.Base64Engine().decrypt(fh, decrypted_strings)
+        self.assertEqual(test_string, decrypted_strings[0])
 
     def test_decrypt_list(self):
+        fh = io.BytesIO()
+        fh.write(base64.b64encode(bytes("\n".join(self.test_strings), "utf8")))
         # Get a list of the decrypted strings
-        decrypted_strings = [item for item in vcengine.Base64Engine().decrypt([base64.b64encode(s) for s in self.test_strings])]
+        decrypted_strings = []
+        vcengine.Base64Engine().decrypt(fh, decrypted_strings)
         self.assertEqual(self.test_strings, decrypted_strings)
