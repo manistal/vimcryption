@@ -1,10 +1,14 @@
 # Outline
 
 ## Abstract
-- Encryption plugin for VIM.
+The prospect of writing a cryptographic application started out simply; code something up capable of encrypting and decrypting content.  The idea of encrypting messages quickly expanded into encryption of notes, or entire files.  This generalization of target content led us to the idea of a platform-independent editor plugin that could handle encryption of arbitrary data.  The choice of editor was clear: VIM. It runs on many platforms and can execute Python through it's vimconfig and plugin interfaces.  This plugin registers file io handling functions with VIM which replace the default ones.  All disk access from the editor is thus routed through this plugin, ensuring that all externally observable data is put through an encryption engine, including temporary files.
 
 ## Introduction
+Any encryption plugin needs to be flexibly architected so that it can keep up with the cryptographic arms race.  To support this, we identified two main areas of development.  The first is the VIM interface, which describes to the editor what our library will be responsible for.  The second is an extensible encryption library that can handle file IO.
+
 - VIM's existing encryption functionality is limited in configuration options.
+
+The encryption library is based on encryption engines, which implement the header processing and encryption/decryption APIs.  Once a file is loaded and the header is processed, if that file requires vimcryption, the necessary Engine is loaded.  That engine is then handed the file handle to scan for any additional meta-data it requires.  Any sybsequent disk reads are done through `EncryptionEngine.decrypt` and disk writes through `EncryptionEngine.encrypt`.
 
 ## Background 
 
@@ -51,11 +55,10 @@ The Python based file handler is connstructed at the same time the auto-commands
     - File Write
     - Buffer Write
     - File Append
-- Define Encrypt and Decrypt API
-    - EncryptionEngine
-        - encrypt(buffer)
-        - decrypt(file)
-- Add Password or Key support
+
+The encryption API was defined and encoded into an abstract base class called `EncryptionEngine`.  The API requires any `EncryptionEngine` to define two methods, `encrypt(buffer, file_handle)` and `decrypt(file_handle, buffer)`.  `encrypt` takes a VIM buffer and applies encryption to it before writing it to the file handle.  `decrypt` takes a file handle which it reads and decrypts into a VIM buffer.  We set up a unit test environment using Python 2.7 and 3.4 with `nose2`[6] to test the `EncryptionEngine`s.  A virtual environment is created for both Python versions, `vimcryption` is installed in each and then the test suite is run.  Each engine is tested to ensure that it's encrypt/decrypt functions match the algorithm they are supposed to implement.  Once the disk access hooks were configured, a pass-through engine was implemented to test the connection.  This `PassThroughEngine` simply writes buffer contents to the file and vice versa, but proved that the paradigm would work.  With the architecture proven, we needed an engine that actually modified file contents on disk.  To start, a simple keyless base64 encoding[7] was used to scramble the contents.
+
+With the framework set up and doing simple encryption, continued development will be focused on implementing additional testing and encryption schemes.  VIM configuration and installation unit tests are needed to ensure compatibility isn't affected by any future changes.  A pure python implementation of AES128 will allow passkey based encryption in an easily delivered, cross-platform package.
 
 ## Resources
 
@@ -73,3 +76,9 @@ http://vim.wikia.com/wiki/Encryption
 
 [5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.   
 https://github.com/vim-scripts/gnupg.vim
+
+[6] Pellerin et al. "nose2" (17 Feb 2018) GitHub Repository.
+https://github.com/nose-devs/nose2
+
+[7] "Base64" Wikipedia. Accessed 10 April 2018
+https://en.wikipedia.org/wiki/Base64
