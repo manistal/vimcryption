@@ -17,7 +17,7 @@ We also searched `https://vimawesome.com/`, the largest directory of vim plugins
 
 ## Methodology
 
-In it's role as a text editor, Vim is directly responsible for all the file operations a user need in order to interact with the filesystem. Additionally, Vim provides quality of life features to the user such as swap and backup files in case the session is interrupted or corrupted, undo files so the user can have a persistant undo stack, and logs command history so the user can repeat commands used earlier. To implement a secure encryption extension to Vim, we need to take into account the entire dataflow to ensure that plaintext is not visible outside of the active memory of the editor's process. 
+In it's role as a text editor, Vim is directly responsible for all the file operations a user needs in order to interact with the filesystem. Additionally, Vim provides quality of life features to the user such as swap and backup files in case the session is interrupted or corrupted, undo files so the user can have a persistant undo stack, and logs command history so the user can repeat commands used earlier. To implement a secure encryption extension to Vim, we need to take into account the entire dataflow to ensure that plaintext is not visible outside of the active memory of the editor's process. 
 
 Securing the unintential leak of plaintext data via temporary files is relatively simple in Vim. As discussed in the Vim Tips Wiki, we can disable the creation of temporary files by using vim-script in our plugin load [4]:  
 
@@ -40,7 +40,9 @@ Intercepting the actual reading and writing of the buffer is directly supported 
     au FileAppendCmd *    py VCF.FileAppend()
 ```
 
-The Python based file handler is connstructed at the same time the auto-commands are registered and loads user settings from pre-defined user variables that can be set in the configurations file (`.vimrc`) or via the command prompt inside of vim. When the FileHandler is constructed it instantiates a Read/Write Engine using the strategy design pattern based on the encyrption method the user would like to use (or that the file metadata specifies). 
+The `py` command used in the snippet above is the result of builtin Python plugin support provided by Vim. At compile time, the Vim install can be configured to build in Python support with Python2 or Python3. Vimcryption supports either interpreter and creates an alias for the installed interpreter after detecting it on load. When Vim loads, it instantiates an interpreter process which is active throughout the lifetime of the application. This allows us to load our libraries from the plugin path, and use them on-demand inside of Vim functions as seen above. This behavior also allows our plugin libraries to maintain state in between calls, so that we can read in file meta-data and still use that meta-data during flushes to disk. 
+
+The Python based file handler is connstructed at the same time the auto-commands are registered and loads user settings from pre-defined user variables that can be set in the configurations file (`.vimrc`) or via the command prompt inside of vim. When the FileHandler is constructed it instantiates a Read/Write Engine using the strategy design pattern based on the encyrption method the user would like to use (or that which the file metadata specifies). 
 
 
 - Setup VIM disk access hooks
