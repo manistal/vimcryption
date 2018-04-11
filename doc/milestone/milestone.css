@@ -1,0 +1,24 @@
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 10px;
+	padding: 0 12px;
+	line-height: 20px;
+	word-wrap: break-word;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 10px;
+    line-height: 19px;
+    padding: 0px;
+}
+
+pre {
+    padding: 0px;
+}
+
+:not(pre):not(.hljs) > code {
+	color: rgb(83, 152, 241); /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
