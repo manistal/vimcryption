@@ -69,8 +69,8 @@ http://vim.wikia.com/wiki/Encryption
 [5] Markus Braun, James McCoy. "gnupg.vim" (2012) GitHub Repository.   
 https://github.com/vim-scripts/gnupg.vim
 
-[6] Pellerin et al. "nose2" (17 Feb 2018) GitHub Repository.
+[6] Pellerin et al. "nose2" (17 Feb 2018) GitHub Repository.    
 https://github.com/nose-devs/nose2
 
-[7] "Base64" Wikipedia. Accessed 10 April 2018
+[7] "Base64" Wikipedia. Accessed 10 April 2018    
 https://en.wikipedia.org/wiki/Base64
