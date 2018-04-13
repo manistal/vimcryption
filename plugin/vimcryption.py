@@ -81,12 +81,12 @@ class VCFileHandler():
         # Don't do anything if the file doesnt exist
         # Write functions will create file
         if not os.path.exists(file_name): return
+        if (vim.eval("&modifiable") == '0'): return
+        
 
-        with open(file_name, 'rb+') as current_file:
+        with open(file_name, 'rb') as current_file:
             self.ProcessHeader(current_file)
-
-            for line in self.cipher_engine().decrypt(current_file):
-                vim.current.buffer.append(line)
+            self.cipher_engine().decrypt(current_file, vim.current.buffer)
 
         # Vim adds an extra line at the top of the buffer 
         # We need to remove it or files keep getting longer
@@ -103,11 +103,9 @@ class VCFileHandler():
         # Write functions will create file
         if not os.path.exists(file_name): return
 
-        with open(file_name, 'rb+') as current_file:
+        with open(file_name, 'rb') as current_file:
             self.ProcessHeader(current_file)
-
-            for line in self.cipher_engine().decrypt(current_file):
-                vim.current.buffer.append(line)
+            self.cipher_engine().decrypt(current_file, vim.current.buffer)
 
         # Vim adds an extra line at the top of the buffer 
         # We need to remove it or files keep getting longer
@@ -123,9 +121,7 @@ class VCFileHandler():
 
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
-
-            for line in self.cipher_engine().encrypt(vim.current.buffer):
-                current_file.write(line + "\n")
+            self.cipher_engine().encrypt(vim.current.buffer, current_file)
 
         vim.command(':set nomodified')
 
@@ -142,9 +138,7 @@ class VCFileHandler():
 
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
-
-            for line in self.cipher_engine().encrypt(current_range):
-                current_file.write(line + "\n")
+            self.cipher_engine().encrypt(vim.current.buffer, current_file)
 
         vim.command(':set nomodified')
 
@@ -160,9 +154,7 @@ class VCFileHandler():
 
         with open(file_name, 'ab') as current_file:
             self.WriteHeader(current_file)
-
-            for line in self.cipher_engine().encrypt(current_range):
-                current_file.write(line + "\n")
+            self.cipher_engine().encrypt(vim.current.buffer, current_file)
 
         vim.command(':set nomodified')
 
