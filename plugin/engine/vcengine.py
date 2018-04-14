@@ -78,7 +78,7 @@ class BlockCipherEngine(EncryptionEngine):
             c = fh.read(1)
 
     @staticmethod
-    def block_cipher(generator, block_size, pad):
+    def block_iter(generator, block_size, pad):
         # type: (Iterable, int)
         block = []
         for item in generator:
@@ -97,13 +97,13 @@ class BlockCipherEngine(EncryptionEngine):
             iterable = data
         else:
             iterable = self.buffer_iter(data)
-        for block in self.block_cipher(iterable, self.encrypt_blocksize, ""):
+        for block in self.block_iter(iterable, self.encrypt_blocksize, ""):
             fh.write(self.encrypt_block(block))
 
     def decrypt(self, fh, data):
         # type: (io.BytesIO, Union[Iterable[str], str])
         line = ""
-        for block in self.block_cipher(self.byte_iter(fh), self.decrypt_blocksize, b""):
+        for block in self.block_iter(self.byte_iter(fh), self.decrypt_blocksize, b""):
             plaintext = self.decrypt_block(block)
             for c in plaintext:
                 if c == "\n":
