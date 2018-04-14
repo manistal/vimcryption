@@ -1,4 +1,4 @@
-# Vimcryption
+# Vimcryption [![Build Status](https://travis-ci.com/tsmanner/vimcryption.svg?token=Yen55DcFqipKQCH1aKT3&branch=master)](https://travis-ci.com/tsmanner/vimcryption)
 
 Encryption plugin for VIM.
 
