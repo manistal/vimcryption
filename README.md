@@ -1,4 +1,5 @@
-# Vimcryption [![Build Status](https://travis-ci.com/tsmanner/vimcryption.svg?token=Yen55DcFqipKQCH1aKT3&branch=master)](https://travis-ci.com/tsmanner/vimcryption)
+# Vimcryption <a href="https://travis-ci.com/tsmanner/vimcryption" target="_blank"><img src="https://travis-ci.com/tsmanner/vimcryption.svg?token=Yen55DcFqipKQCH1aKT3&amp;branch=master" alt="Build Status" /></a>
+
 
 Encryption plugin for VIM.
 
