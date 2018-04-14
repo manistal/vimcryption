@@ -10,3 +10,6 @@ install:
   - pip install .
 
 script: nose2 -s plugin/
+
+notifications:
+  slack: vimcryption:ZbSaNaMUA83iv60aUEekWdLc
