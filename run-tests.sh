@@ -10,7 +10,7 @@ __setup_venv() {
 
 __do_tests() {
   echo "--Running Python$1 Tests--"
-  venv$1/bin/nose2 -s plugin/
+  PYTHONDONTWRITEBYTECODE=1 venv$1/bin/nose2 -s plugin/
   echo "---------Complete---------"
   echo
 }
