@@ -76,13 +76,15 @@ class VCFileHandler():
         BufReadCmd: Before starting to edit a new buffer.  
         Should read the file into the buffer. 
         """
-        file_name = vim.current.buffer.name
+        file_name = vim.eval('expand("<amatch>")') 
+        modifiable = (vim.eval("&modifiable") != '0') 
 
         # Don't do anything if the file doesnt exist
         # Write functions will create file
         if not os.path.exists(file_name): return
-        if (vim.eval("&modifiable") == '0'): return
-        
+
+        # Unlock read only buffers so we can update them
+        if not modifiable: vim.command(":set ma")
 
         with open(file_name, 'rb') as current_file:
             self.ProcessHeader(current_file)
@@ -91,17 +93,24 @@ class VCFileHandler():
         # Vim adds an extra line at the top of the buffer 
         # We need to remove it or files keep getting longer
         del vim.current.buffer[0]
+
+        # Relock read-only buffers  before user gets it
+        if not modifiable: vim.command(":set noma")
 
     def FileRead(self):
         """
         FileReadCmd: Before reading a file with a ":read" command.
         Should do the reading of the file.
         """
-        file_name = vim.current.buffer.name
+        file_name = vim.eval('expand("<amatch>")') 
+        modifiable = (vim.eval("&modifiable") != '0') 
 
         # Don't do anything if the file doesnt exist
         # Write functions will create file
         if not os.path.exists(file_name): return
+
+        # Unlock read only buffers so we can update them
+        if not modifiable: vim.command(":set ma")
 
         with open(file_name, 'rb') as current_file:
             self.ProcessHeader(current_file)
@@ -110,6 +119,9 @@ class VCFileHandler():
         # Vim adds an extra line at the top of the buffer 
         # We need to remove it or files keep getting longer
         del vim.current.buffer[0]
+
+        # Relock read-only buffers  before user gets it
+        if not modifiable: vim.command(":set noma")
 
     def BufWrite(self):
         """
@@ -117,7 +129,7 @@ class VCFileHandler():
         Should do the writing of the file and reset 'modified' if successful, unless '+' is in
         'cpo' and writing to another file |cpo-+|. The buffer contents should not be changed.
         """
-        file_name = vim.current.buffer.name
+        file_name = vim.eval('expand("<amatch>")') 
 
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
@@ -131,7 +143,8 @@ class VCFileHandler():
         whole buffer.  Should do the writing to the file.  Should not change the buffer.  Use the
         '[ and '] marks for the range of lines.
         """
-        file_name = vim.current.buffer.name
+        file_name = vim.eval('expand("<amatch>")') 
+
         buf_start_line, buf_start_col = vim.buffer.mark("'[")
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
@@ -147,7 +160,8 @@ class VCFileHandler():
         FileAppendCmd: Before appending to a file.  Should do the
         appending to the file.  Use the '[ and '] marks for the range of lines.
         """
-        file_name = vim.current.buffer.name
+        file_name = vim.eval('expand("<amatch>")') 
+
         buf_start_line, buf_start_col = vim.buffer.mark("'[")
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
