@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
-from distutils.core import setup
+from setuptools import setup
 
 setup(
-    name='Vimcryption Test',
+    name='Vimcryption',
     version='0.1',
     description='Test package for VIMCryption VIM plugin.',
     author='Tom Manner, Miguel Nistal',
@@ -12,7 +10,7 @@ setup(
     packages=[
         'plugin',
     ],
-    requires=[
+    install_requires=[
         'nose2',
     ],
 )

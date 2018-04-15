@@ -1,0 +1,13 @@
+language: python
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+install:
+- pip install .
+script: nose2 -s plugin/
+notifications:
+  slack:
+    rooms:
+      secure: LXMr2gCjyjqfrULBRD35gdLa5w1w+BM3VH0sjIavl8SnTWo+ikk7aXHXbVrdbeoQiRnvsTsOI2uo4fjjJzmmzonn9cMRWrMfg7Y4zOhurf1zSEN4pctQq0npCb+Hf269IXnec7BHzvGRsTl/O0HmmRgI3a1U2dF40BcwTSipSQ+XnT9LPHfLZnc8XlOVNKMLBMf8rFl+XKaOKIc6nfE85zwZGEHmhBoHX2zPtsAIxHuQVWt0ppYf9PCZPXa2p9907FzLuPmIweMtMCitxZQhHNkWqI2PtuZ/5C9zC0lZIIPI/tcz0QoeoS9pKCNuUM8vI7AgLeq+NWr54+2zCSi+lQt6TYAF0+ZwV/nmT4Kwp0nZS5AS6BSNTf3b1BZ+6EUwLJL+WvUGHZvLEk3b5MUoVC4dJ+DJVKqt5luppsp3YTBMi0P6cA7l6ctBLwCSItJB37mk++FiaBrug45z5GxpNho0x69vZwuOL8eMgOpB46me6Ho6YjOVtg0WtVzl15v5njsYwtKDkVbWqx1zNDttuZoqbYwglEDykLsFbG0N3/yPl5uB9ANKumHvdjq7+s92sGfxoOJHGI2BKKZ9c8eCf8KRdxVeJvUAVOY4y2WuOU1ekIYwx0jVCdN2SsV6sEGg3+rUb9gV3PHHpAvZVYzRhh+QA2BykLUCx6YpRQB3aqo=

@@ -9,16 +9,16 @@ __setup_venv() {
     virtualenv -p python$1 venv$1
   fi
 
+  . venv$1/bin/activate
   echo "----Installing vimcryption into venv$1----"
-  venv$1/bin/pip install nose2
-  venv$1/bin/python testsetup.py install
-
+  pip install .
   echo "----done----"
 }
 
 __do_tests() {
   echo "--Running Python$1 Tests--"
-  venv$1/bin/nose2 -s test/
+  . venv$1/bin/activate
+  nose2 -s test/
   echo "---------Complete---------"
   echo
 }
