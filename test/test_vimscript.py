@@ -1,18 +1,17 @@
 
+import os
 import sys
 import unittest
 import subprocess as sp
 
 class TestVimcryptionVimscript(unittest.TestCase):
     """
-    Unit tests for vimcryption.VCFileHandler
+    Integration testing for vimcryption vim plugin
+    instantiates vim with plugin and runs commands 
     """
-    def setUp(self):
-        os.remove("test/iopass_test.txt")
-        os.remove("test/base64_test.txt")
-        os.remove("test/viml_testlog.txt")
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         os.remove("test/iopass_test.txt")
         os.remove("test/base64_test.txt")
 
@@ -25,8 +24,8 @@ class TestVimcryptionVimscript(unittest.TestCase):
 
         # Check file output for plaintext
         with open("test/iopass_test.txt") as iop:
-            self.assertEqual(iop.read(), "dmltY3J5cHRlZA==SU9QQVNTLOLOLOLOL\nLOLOLOLOL\n")
+            self.assertEqual(iop.read(), "dmltY3J5cHRlZA==SU9QQVNT\nLOLOLOLOL\n")
 
         # Check file output for plaintext
         with open("test/base64_test.txt") as b64:
-            self.assertEqual(b64.read(), "dmltY3J5cHRlZA==QkFTRTY0ClJBV1JBV1JBV1JBV1JBV1IKUkFXUkFXUkFXUkFXUkFXUgo=")
+            self.assertEqual(b64.read(), "dmltY3J5cHRlZA==QkFTRTY0ClJBV1JBV1JBV1JBV1JBV1IK")
