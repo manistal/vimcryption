@@ -31,10 +31,10 @@ class TestVCFileHandler(unittest.TestCase):
         sys.modules['vim'] = VimMock()
 
         # Set up the input
-        import vimcryption
-        self.VCF = vimcryption.VCFileHandler()
+        import vimcryption 
+        self.VCF = vimcryption.VCFileHandler() 
         self.plaintext_file = BytesIO(b'dmltY3J5cHRlZA==SU9QQVNT\nLOLPLAINTEXT\n')
-        self.base64_file = BytesIO(b'dmltY3J5cHRlZA==QkFTRTY0\nTE9MQkFTRTY0\n')
+        self.base64_file = BytesIO(b'dmltY3J5cHRlZA==QkFTRTY0CmxvbApsb2wKbG9sCgo=')
 
     def test_process_header_plaintext(self):
         self.VCF.ProcessHeader(self.plaintext_file)
