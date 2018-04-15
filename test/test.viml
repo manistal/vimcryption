@@ -1,18 +1,18 @@
 
 :echo "Setting up test env"
-:set verbosefile=test.log
+:set verbosefile=$PWD/test/viml_testlog.txt
 :set verbose=1
-:source $PWD/../plugin/vimcryption.vim
+:source $PWD/plugin/vimcryption.vim
 
 :echo "Testing IO Pass Vimcryption"
-:edit iopass_test.txt
+:edit $PWD/test/iopass_test.txt
 :let g:vimcryption_cipher = "IOPASS"
 :call append('.', "LOLOLOLOL")
 :Vimcrypt
 :write
 
 :echo "Testing Base64 Vimcryption"
-:edit base64_test.txt
+:edit $PWD/test/base64_test.txt
 :let g:vimcryption_cipher = "BASE64"
 :call append('.', "RAWRAWRAWRAWRAWR")
 :Vimcrypt
