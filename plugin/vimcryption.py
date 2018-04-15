@@ -19,9 +19,9 @@ class VCFileHandler():
     def __init__(self):
         """
         Configurations:
-        g:vimcryption_cipher_type   Entry in self._CIPHERS for Engine setting
+        g:vimcryption_cipher   Entry in self._CIPHERS for Engine setting
         """
-        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher_type', \"IOPASS\")")
+        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
         self.cipher_engine = self._CIPHERS.get(self.cipher_type, PassThrough) 
 
         if self.cipher_type not in self._CIPHERS:
@@ -44,11 +44,11 @@ class VCFileHandler():
         try:
             # First check to see if we should be handling it 
             header_valid = b64decode(file_handle.read(16))
-            if (header_valid != 'vimcrypted'):
+            if (header_valid != b'vimcrypted'):
                 return self.DisableVC(file_handle)
 
             # Setup the cipher IO for encrypt/decrypt 
-            header_cipher = b64decode(file_handle.read(8))
+            header_cipher = b64decode(file_handle.read(8)).decode('utf-8')
             self.cipher_engine = self._CIPHERS[header_cipher]
             self.cipher_type = header_cipher
 
