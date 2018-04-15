@@ -44,11 +44,11 @@ class VCFileHandler():
         try:
             # First check to see if we should be handling it 
             header_valid = b64decode(file_handle.read(16))
-            if (header_valid != 'vimcrypted'):
+            if (header_valid != b'vimcrypted'):
                 return self.DisableVC(file_handle)
 
             # Setup the cipher IO for encrypt/decrypt 
-            header_cipher = b64decode(file_handle.read(8))
+            header_cipher = b64decode(file_handle.read(8)).decode('utf-8')
             self.cipher_engine = self._CIPHERS[header_cipher]
             self.cipher_type = header_cipher
 
