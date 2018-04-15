@@ -19,9 +19,9 @@ class VCFileHandler():
     def __init__(self):
         """
         Configurations:
-        g:vimcryption_cipher_type   Entry in self._CIPHERS for Engine setting
+        g:vimcryption_cipher   Entry in self._CIPHERS for Engine setting
         """
-        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher_type', \"IOPASS\")")
+        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
         self.cipher_engine = self._CIPHERS.get(self.cipher_type, PassThrough) 
 
         if self.cipher_type not in self._CIPHERS:
