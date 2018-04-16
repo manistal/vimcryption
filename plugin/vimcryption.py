@@ -6,7 +6,7 @@ import os
 import binascii
 from base64 import b64decode, b64encode
 
-from engine import PassThrough, Base64Engine
+from .engine import PassThrough, Base64Engine
 
 class VCFileHandler():
     _CIPHERS = {

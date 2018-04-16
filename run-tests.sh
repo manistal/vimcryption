@@ -23,10 +23,7 @@ __do_tests() {
   echo
 }
 
-export ORIG_PYPATH=$PYTHONPATH
-export ORIG_PYBYTECODE=$PYTHONDONTWRITEBYTECODE
-
-export PYTHONPATH=$PYTHONPATH:$PWD/plugin
+#export PYTHONPATH=$PYTHONPATH:$PWD/plugin
 export PYTHONDONTWRITEBYTECODE=1
 
 __setup_venv 2
@@ -34,7 +31,3 @@ __setup_venv 3
 echo
 __do_tests 2
 __do_tests 3
-
-export PYTHONPATH=ORIG_PYPATH
-export PYTHONDONTWRITEBYTECODE=ORIG_PYBYTECODE
-

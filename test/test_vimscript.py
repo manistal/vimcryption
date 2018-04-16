@@ -12,9 +12,12 @@ class TestVimcryptionVimscript(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        os.remove("test/iopass_test.txt")
-        os.remove("test/base64_test.txt")
+        if os.path.exists("test/iopass_test.txt"):
+            os.remove("test/iopass_test.txt")
+        if os.path.exists("test/base64_test.txt"):
+            os.remove("test/base64_test.txt")
 
+    @unittest.skip("TSM: Hangs waiting for user input.  I can't quit vim, have to Ctrl-z and kill it.")
     def test_vimscript(self):
         proc = sp.Popen(["vim -s test/test.viml"], shell=True)
         proc.wait()
