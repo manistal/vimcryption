@@ -4,7 +4,7 @@ Base64Engine
 
 import base64
 
-from .vcengine import BlockCipherEngine
+from .engine import BlockCipherEngine
 
 __all__ = [
     "Base64Engine",
