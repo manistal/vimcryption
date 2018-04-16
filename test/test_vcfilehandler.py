@@ -31,7 +31,7 @@ class TestVCFileHandler(unittest.TestCase):
         sys.modules['vim'] = VimMock()
 
         # Set up the input
-        import vimcryption 
+        import plugin.vimcryption as vimcryption 
         self.VCF = vimcryption.VCFileHandler() 
         self.plaintext_file = BytesIO(b'dmltY3J5cHRlZA==SU9QQVNT\nLOLPLAINTEXT\n')
         self.base64_file = BytesIO(b'dmltY3J5cHRlZA==QkFTRTY0CmxvbApsb2wKbG9sCgo=')
