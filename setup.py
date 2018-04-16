@@ -8,7 +8,7 @@ setup(
     author_email='tom.s.manner@gmail.com, nistam328@gmail.com',
     url='https://www.github.com/tsmanner/vimcryption',
     packages=[
-        'plugin',
+        'encryptionengine',
     ],
     install_requires=[
         'nose2',
