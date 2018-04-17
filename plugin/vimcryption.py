@@ -27,13 +27,7 @@ class VCFileHandler():
         if self.cipher_type not in self._CIPHERS:
             self.cipher_type = "IOPASS"
 
-
-    def DisableVC(self, file_handle):
-        """ Disable Vimcryption Engine and Reset File Pointer """
-        file_handle.seek(0) 
-        vim.command("call UnloadVimcryption()")
-        self.cipher_engine = PassThrough
-
+    # Header Functions
     def ProcessHeader(self, file_handle):
         """ Process vimcryption header
             @param file_handle expects file-like bytes object
@@ -65,63 +59,72 @@ class VCFileHandler():
             print("Unsupported Cipher: " + header_cipher)
             self.DisableVC(file_handle)
 
-
     def WriteHeader(self, file_handle):
         file_handle.seek(0) # Always start at the begginning
         file_handle.write(b64encode('vimcrypted'))
         file_handle.write(b64encode(self.cipher_type))
+
+    def DisableVC(self, file_handle):
+        """ Disable Vimcryption Engine and Reset File Pointer """
+        file_handle.seek(0) 
+        vim.command("call UnloadVimcryption()")
+        self.cipher_engine = PassThrough
+
+    # Reader Functions 
+    def VimCryptionRead(self):
+        """
+        General `read` function for dealing with reads in Vim using 
+        the encryption engine to append the decrypted lines
+        """
+        file_name = vim.eval('expand("<amatch>")') 
+        modifiable = (vim.eval("&modifiable") != '0') 
+
+        # Don't do anything if the file doesnt exist
+        # Write functions will create file
+        if not os.path.exists(file_name): return
+
+        # Unlock read only buffers so we can update them
+        if not modifiable: vim.command(":set ma")
+
+        with open(file_name, 'rb') as current_file:
+            self.ProcessHeader(current_file)
+            self.cipher_engine().decrypt(current_file, vim.current.buffer)
+
+        # Vim adds an extra line at the top of the NEW buffer 
+        del vim.current.buffer[0]
+
+        # Relock read-only buffers  before user gets it
+        if not modifiable: vim.command(":set noma")
 
     def BufRead(self):
         """
         BufReadCmd: Before starting to edit a new buffer.  
         Should read the file into the buffer. 
         """
-        file_name = vim.eval('expand("<amatch>")') 
-        modifiable = (vim.eval("&modifiable") != '0') 
-
-        # Don't do anything if the file doesnt exist
-        # Write functions will create file
-        if not os.path.exists(file_name): return
-
-        # Unlock read only buffers so we can update them
-        if not modifiable: vim.command(":set ma")
-
-        with open(file_name, 'rb') as current_file:
-            self.ProcessHeader(current_file)
-            self.cipher_engine().decrypt(current_file, vim.current.buffer)
-
-        # Vim adds an extra line at the top of the buffer 
-        # We need to remove it or files keep getting longer
-        del vim.current.buffer[0]
-
-        # Relock read-only buffers  before user gets it
-        if not modifiable: vim.command(":set noma")
+        self.VimCryptionRead()        
 
     def FileRead(self):
         """
         FileReadCmd: Before reading a file with a ":read" command.
         Should do the reading of the file.
         """
+        self.VimCryptionRead()        
+
+    # Writer Functions 
+    def VimCryptionWrite(self, buffer):
         file_name = vim.eval('expand("<amatch>")') 
-        modifiable = (vim.eval("&modifiable") != '0') 
+        new_file = not os.path.exists(file_name)
 
-        # Don't do anything if the file doesnt exist
-        # Write functions will create file
-        if not os.path.exists(file_name): return
+        with open(file_name, 'wb+') as current_file:
+            self.WriteHeader(current_file)
+            self.cipher_engine().encrypt(vim.current.buffer, current_file)
 
-        # Unlock read only buffers so we can update them
-        if not modifiable: vim.command(":set ma")
+        # Writers must always reset the modified bit
+        vim.command(':set nomodified')
 
-        with open(file_name, 'rb') as current_file:
-            self.ProcessHeader(current_file)
-            self.cipher_engine().decrypt(current_file, vim.current.buffer)
-
-        # Vim adds an extra line at the top of the buffer 
-        # We need to remove it or files keep getting longer
-        del vim.current.buffer[0]
-
-        # Relock read-only buffers  before user gets it
-        if not modifiable: vim.command(":set noma")
+        # On writes Vim echoes what it did so the user can tell 
+        new_file_str = "[New]" if new_file else "" 
+        print("\"%s\" %s %sL written" % (file_name, new_file_str, len(vim.current.buffer)))
 
     def BufWrite(self):
         """
@@ -129,13 +132,7 @@ class VCFileHandler():
         Should do the writing of the file and reset 'modified' if successful, unless '+' is in
         'cpo' and writing to another file |cpo-+|. The buffer contents should not be changed.
         """
-        file_name = vim.eval('expand("<amatch>")') 
-
-        with open(file_name, 'wb+') as current_file:
-            self.WriteHeader(current_file)
-            self.cipher_engine().encrypt(vim.current.buffer, current_file)
-
-        vim.command(':set nomodified')
+        self.VimCryptionWrite(vim.current.buffer)
 
     def FileWrite(self):
         """
@@ -143,18 +140,13 @@ class VCFileHandler():
         whole buffer.  Should do the writing to the file.  Should not change the buffer.  Use the
         '[ and '] marks for the range of lines.
         """
-        file_name = vim.eval('expand("<amatch>")') 
-
         buf_start_line, buf_start_col = vim.buffer.mark("'[")
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
-        with open(file_name, 'wb+') as current_file:
-            self.WriteHeader(current_file)
-            self.cipher_engine().encrypt(vim.current.buffer, current_file)
+        self.VimCryptionWrite(current_range)
 
-        vim.command(':set nomodified')
-
+    # Append Function
     def FileAppend(self):
         """
         FileAppendCmd: Before appending to a file.  Should do the
@@ -168,7 +160,7 @@ class VCFileHandler():
 
         with open(file_name, 'ab') as current_file:
             self.WriteHeader(current_file)
-            self.cipher_engine().encrypt(vim.current.buffer, current_file)
+            self.cipher_engine().encrypt(current_range, current_file)
 
         vim.command(':set nomodified')
 
