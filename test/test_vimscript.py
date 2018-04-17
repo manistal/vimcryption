@@ -1,6 +1,7 @@
 
 import os
 import sys
+import time
 import unittest
 import subprocess as sp
 
@@ -12,11 +13,20 @@ class TestVimcryptionVimscript(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        os.remove("test/iopass_test.txt")
-        os.remove("test/base64_test.txt")
+        if os.path.exists("test/iopass_test.txt"):
+            os.remove("test/iopass_test.txt")
+        if os.path.exists("test/base64_test.txt"):
+            os.remove("test/base64_test.txt")
 
+    #@unittest.skip("TSM: Hangs waiting for user input.  I can't quit vim, have to Ctrl-z and kill it.")
     def test_vimscript(self):
+        #timeout = 10
+        #t0 = time.time()
         proc = sp.Popen(["vim -s test/test.viml"], shell=True)
+        #while proc.poll() is None:
+        #    if time.time() - t0 >= 10:
+        #        proc.terminate()
+        #    time.sleep(.5)
         proc.wait()
 
         # Assert there was a zero return code

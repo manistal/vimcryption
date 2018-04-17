@@ -4,7 +4,7 @@ Base64Engine
 
 import base64
 
-from engine import BlockCipherEngine
+from .engine import BlockCipherEngine
 
 __all__ = [
     "Base64Engine",

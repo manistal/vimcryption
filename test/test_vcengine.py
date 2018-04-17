@@ -7,7 +7,7 @@ import random
 import string
 import unittest
 
-from engine import *
+from encryptionengine import *
 
 
 class TestEncryptionEngine(unittest.TestCase):

@@ -13,7 +13,8 @@ endif
 python import sys
 python import vim
 python sys.path.append(vim.eval('expand("<sfile>:h")'))
-python import vimcryption 
+python sys.path.append(vim.eval('expand("<sfile>:h")') + "/..")
+python import vimcryption
 
 " Enable Vimcryption Crypto Functionality 
 function LoadVimcryption()
