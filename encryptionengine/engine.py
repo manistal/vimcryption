@@ -15,8 +15,8 @@ class EncryptionEngine:
     Base vimcryption encryption engine.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, prompt=input):
+        self.input = prompt
 
     def encrypt(self, data, fh):
         # type: (Union[List[str], str], io.BytesIO):
@@ -43,8 +43,7 @@ class PassThrough(EncryptionEngine):
         # type: (io.BytesIO, Union[List[str], str]):
         for bline in fh:
             line = bline.decode().rstrip("\n")
-            if line != "":
-                data.append(line)
+            data.append(line)
 
 
 class BlockCipherEngine(EncryptionEngine):
