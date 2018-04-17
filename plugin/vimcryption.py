@@ -136,7 +136,8 @@ class VCFileHandler():
 
         # On writes Vim echoes what it did so the user can tell 
         new_file_str = "[New]" if new_file else "" 
-        print("\"%s\" %s %sL written" % (file_name, new_file_str, len(vim.current.buffer)))
+        print("\"{}\" {} {}L written".format(
+              os.path.basename(file_name), new_file_str, len(vim.current.buffer)))
 
     def BufWrite(self):
         """
