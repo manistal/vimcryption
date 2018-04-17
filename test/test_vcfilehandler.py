@@ -19,7 +19,7 @@ class VimMock():
         pass
 
     def eval(self, command):
-        return ""
+        return "IOPASS"
 
 
 class TestVCFileHandler(unittest.TestCase):
