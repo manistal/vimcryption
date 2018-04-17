@@ -1,10 +1,18 @@
 
 
+__quiet() {
+  $@ > /dev/null
+}
+
+
+__silence() {
+  $@ 2>&1 > /dev/null
+}
+
 __setup_venv() {
-  echo "----Creating Python$1 virtual envrionment in venv$1----"
   rm -rf venv$1
   __python=python$1
-  which python$1
+  which python$1 > /dev/null
   if [ "$?" != "0" ]
   then
     if [ "$1" = "2" ]
@@ -12,15 +20,11 @@ __setup_venv() {
       __python=python
     fi
   fi
+  (>&2 echo "  Python$1 ($(which $__python)) -> venv$1")
   virtualenv -p $__python venv$1
 
   . venv$1/bin/activate
-  echo "----Installing vimcryption into venv$1----"
-  which $__python
   pip install .
-  which nose2
-  ls venv$1/bin/
-  echo "----done----"
 }
 
 __do_tests() {
@@ -40,8 +44,20 @@ __do_tests() {
 #export PYTHONPATH=$PYTHONPATH:$PWD/plugin
 export PYTHONDONTWRITEBYTECODE=1
 
-__setup_venv 2
-__setup_venv 3
+__prefix="__quiet"
+if [ "$1" = "-v" ]
+then
+  __prefix=""
+elif [ "$1" = "-s" ]
+then
+  __prefix="__silence"
+fi
+
+echo "----Creating Python virtual environments----"
+$__prefix __setup_venv 2 &
+$__prefix __setup_venv 3 &
+wait
+echo "----done----"
 echo
 __do_tests 2
 __do_tests 3
