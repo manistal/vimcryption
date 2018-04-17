@@ -8,24 +8,43 @@ from base64 import b64decode, b64encode
 
 from encryptionengine import PassThrough, Base64Engine
 
-class VCFileHandler():
-    _CIPHERS = {
+class UnsupportedCipherException(Exception):
+    pass
+
+
+def VCPrompt(message):
+    vim.command('call inputsave()')
+    vim.command("let user_input = input('" + message + " ')")
+    vim.command('call inputrestore()')
+    return vim.eval('user_input')
+
+
+def MakeCipher(cipher_type):
+    CIPHERS = {
         'IOPASS' : PassThrough, 
         'BASE64' : Base64Engine, 
         'AES128' : PassThrough, 
         'AES256' : PassThrough
     }
+    if cipher_type not in CIPHERS:
+        raise UnsupportedCipherException("Tried to construct unsupported cipher: " + cipher_type)
+    return CIPHERS[cipher_type](prompt=VCPrompt)
 
+
+class VCFileHandler():
     def __init__(self):
         """
         Configurations:
         g:vimcryption_cipher   Entry in self._CIPHERS for Engine setting
         """
         self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
-        self.cipher_engine = self._CIPHERS.get(self.cipher_type, PassThrough) 
+        self.cipher_engine = MakeCipher(self.cipher_type)
 
-        if self.cipher_type not in self._CIPHERS:
-            self.cipher_type = "IOPASS"
+    def DisableVC(self, file_handle):
+        """ Disable Vimcryption Engine and Reset File Pointer """
+        file_handle.seek(0) 
+        vim.command("call UnloadVimcryption()")
+        self.cipher_engine = MakeCipher("IOPASS")
 
     # Header Functions
     def ProcessHeader(self, file_handle):
@@ -42,9 +61,8 @@ class VCFileHandler():
                 return self.DisableVC(file_handle)
 
             # Setup the cipher IO for encrypt/decrypt 
-            header_cipher = b64decode(file_handle.read(8)).decode('utf-8')
-            self.cipher_engine = self._CIPHERS[header_cipher]
-            self.cipher_type = header_cipher
+            self.cipher_type = b64decode(file_handle.read(8)).decode('utf-8')
+            self.cipher_engine = MakeCipher(self.cipher_type)
 
         # Python2 Padding Error
         except TypeError as err:
@@ -55,20 +73,14 @@ class VCFileHandler():
             self.DisableVC(file_handle)
 
         # Unsupported Cipher
-        except KeyError as err:
-            print("Unsupported Cipher: " + header_cipher)
+        except UnsupportedCipherException as err:
+            print("Unsupported Cipher: " + self.cipher_type)
             self.DisableVC(file_handle)
 
     def WriteHeader(self, file_handle):
         file_handle.seek(0) # Always start at the begginning
         file_handle.write(b64encode('vimcrypted'))
         file_handle.write(b64encode(self.cipher_type))
-
-    def DisableVC(self, file_handle):
-        """ Disable Vimcryption Engine and Reset File Pointer """
-        file_handle.seek(0) 
-        vim.command("call UnloadVimcryption()")
-        self.cipher_engine = PassThrough
 
     # Reader Functions 
     def VimCryptionRead(self):
@@ -88,7 +100,7 @@ class VCFileHandler():
 
         with open(file_name, 'rb') as current_file:
             self.ProcessHeader(current_file)
-            self.cipher_engine().decrypt(current_file, vim.current.buffer)
+            self.cipher_engine.decrypt(current_file, vim.current.buffer)
 
         # Vim adds an extra line at the top of the NEW buffer 
         del vim.current.buffer[0]
@@ -117,7 +129,7 @@ class VCFileHandler():
 
         with open(file_name, 'wb+') as current_file:
             self.WriteHeader(current_file)
-            self.cipher_engine().encrypt(vim.current.buffer, current_file)
+            self.cipher_engine.encrypt(vim.current.buffer, current_file)
 
         # Writers must always reset the modified bit
         vim.command(':set nomodified')
@@ -160,7 +172,7 @@ class VCFileHandler():
 
         with open(file_name, 'ab') as current_file:
             self.WriteHeader(current_file)
-            self.cipher_engine().encrypt(current_range, current_file)
+            self.cipher_engine.encrypt(current_range, current_file)
 
         vim.command(':set nomodified')
 
