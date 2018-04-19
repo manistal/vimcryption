@@ -90,6 +90,7 @@ venv/
 venv2/
 venv3/
 ENV/
+venv*/
 
 # Spyder project settings
 .spyderproject

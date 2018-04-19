@@ -9,10 +9,9 @@ __silence() {
   $@ 2>&1 > /dev/null
 }
 
-__setup_venv() {
-  rm -rf venv$1
+__get_python_interpreter_path() {
   __python=python$1
-  which python$1 > /dev/null
+  which $__python > /dev/null
   if [ "$?" != "0" ]
   then
     if [ "$1" = "2" ]
@@ -20,8 +19,15 @@ __setup_venv() {
       __python=python
     fi
   fi
-  (>&2 echo "  Python$1 ($(which $__python)) -> venv$1")
-  virtualenv -p $__python venv$1
+  __python=$(which $__python)
+  echo $__python
+}
+
+__setup_venv() {
+  rm -rf venv$1
+  __python=$(__get_python_interpreter_path $1)
+  (>&2 echo "    python$1 ($__python) -> venv$1")
+  $(dirname $__python)/virtualenv -v -p $__python venv$1
 
   . venv$1/bin/activate
   pip install .
@@ -53,11 +59,29 @@ then
   __prefix="__silence"
 fi
 
-echo "----Creating Python virtual environments----"
-$__prefix __setup_venv 2 &
-$__prefix __setup_venv 3 &
-wait
-echo "----done----"
+__versions=(
+  2
+  3
+)
+
+echo "Creating Python virtual environments"
+declare -A __pids
+declare -A __rcs
+for __version in "${__versions[@]}"
+do
+  $__prefix __setup_venv $__version &
+  __pids[$__version]=$!
+done
+
+for __version in "${!__pids[@]}"
+do
+  wait ${__pids[$__version]}
+  __rcs[$__version]=$?
+done
+
+echo "done."
 echo
-__do_tests 2
-__do_tests 3
+for __version in "${__versions[@]}"
+do
+  __do_tests $__version
+done
