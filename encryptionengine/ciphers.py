@@ -3,8 +3,8 @@ from base64 import b64decode, b64encode
 import binascii
 import importlib
 
-from engine import PassThrough
-from base64engine import Base64Engine
+from .engine import PassThrough
+from .base64engine import Base64Engine
 
 
 class UnsupportedCipherException(Exception):

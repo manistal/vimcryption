@@ -35,7 +35,7 @@ class TestVimcryptionVimscript(unittest.TestCase):
 
         # Check file output for plaintext
         with open("test/iopass_test.txt") as iop:
-            self.assertEqual(iop.read(), "dmltY3J5cHRlZA==SU9QQVNT\nLOLOLOLOL\n")
+            self.assertEqual(iop.read(), "\nLOLOLOLOL\n")
 
         # Check file output for plaintext
         with open("test/base64_test.txt") as b64:
