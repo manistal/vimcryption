@@ -1,7 +1,11 @@
 """
 """
 
+from base64 import b64decode, b64encode
+import binascii
 from functools import reduce
+import importlib
+
 
 __all__ = [
     "EncryptionEngine",
@@ -10,13 +14,73 @@ __all__ = [
 ]
 
 
+class UnsupportedCipherException(Exception):
+    pass
+
+
+class NotVimcryptedException(Exception):
+    pass
+
+
+class CipherFactory:
+    CIPHERS = {
+        'IOPASS' : PassThrough, 
+        'BASE64' : Base64Engine, 
+        'AES128' : PassThrough, 
+        'AES256' : PassThrough
+    }
+
+    def addCipher(self, cipher_token, cipher_engine):
+        if cipher_token not in self.CIPHERS:
+            if isinstance(cipher_engine, str):
+                cipher_engine = importlib.import_module(cipher_engine)
+            self.CIPHERS[cipher_token] = cipher_engine
+
+    def getEngineForCipher(self, cipher_type, prompt=input):
+        if cipher_type not in self.CIPHERS:
+            raise UnsupportedCipherException("Tried to construct unsupported cipher: " + cipher_type)
+        return self.CIPHERS[cipher_type](*args, prompt=prompt, cipher_type=cipher_type, **kwargs)
+
+    def getEngineForFile(file_handle, prompt=input):
+        """ Process vimcryption header
+            @param file_handle expects file-like bytes object
+            0:15 (16)  bytes - b64encode of "vimcryption" if the file is our type
+            16:23 (8)  bytes - b64encode of cipher, always 6 chars (AES128, AES256, BASE64, IOPASS)
+            24:X  (X)  bytes - [optional]  - Engine may process additional metadata 
+        """
+        try:
+            # First check to see if we should be handling it 
+            header_valid = b64decode(file_handle.read(16))
+            if (header_valid != b'vimcrypted'):
+                raise NotVimcryptedException("Not a Vimcryption File Encoding")
+
+            # Setup the cipher IO for encrypt/decrypt 
+            cipher_type = b64decode(file_handle.read(8)).decode('utf-8')
+
+            return self.getEngineForCipher(cipher_type, prompt=prompt)
+
+        # Python2 Padding Error
+        except TypeError as err:
+            raise NotVimcryptedException("Not a Vimcryption File Encoding")
+
+        # Python3 Padding Error 
+        except binascii.Error as err:
+            raise NotVimcryptedException("Not a Vimcryption File Encoding")
+
+        # Unsupported Cipher
+        except UnsupportedCipherException as err:
+            print("Unsupported Cipher: " + self.cipher_type)
+            raise NotVimcryptedException("Not a Vimcryption File Encoding")
+
+
 class EncryptionEngine:
     """
     Base vimcryption encryption engine.
     """
 
-    def __init__(self, prompt=input):
+    def __init__(self, prompt=input, cipher_type=None):
         self.input = prompt
+        self.cipher_type = cipher_type
 
     def encrypt(self, data, fh):
         # type: (Union[List[str], str], io.BytesIO):
@@ -25,6 +89,21 @@ class EncryptionEngine:
     def decrypt(self, fh, data):
         # type: (io.BytesIO, Union[List[str], str]):
         raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
+
+    def readHeader(self, file_handle):
+        """
+        Implement for additional meta-data needed for the cipher implementation
+        """
+        pass
+
+    def writeHeader(self, file_handle):
+        """
+        Requires anyone implementing encryption Engine to 
+        call super.writeHeader()
+        """ 
+        file_handle.seek(0) # Always start at the begginning
+        file_handle.write(b64encode('vimcrypted'))
+        file_handle.write(b64encode(self.cipher_type))
 
 
 class PassThrough(EncryptionEngine):
@@ -44,6 +123,9 @@ class PassThrough(EncryptionEngine):
         for bline in fh:
             line = bline.decode().rstrip("\n")
             data.append(line)
+
+    def writeHeader(self, fh):
+        pass
 
 
 class BlockCipherEngine(EncryptionEngine):
