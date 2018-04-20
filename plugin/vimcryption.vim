@@ -9,6 +9,18 @@ else
     finish
 endif
 
+" Default values for configs
+if !exists("g:vimcryption_cipher")
+  " Cipher to encrypt files with, default is nothing
+  let g:vimcryption_cipher = "IOPASS"
+endif
+
+if !exists("g:vimcryption_start_onload")
+  " Whether or not to enable the plugin when vim starts
+  "  default is yes since we're working with security 
+  let g:vimcryption_start_onload = 1
+endif
+
 " Load the Python Libraries
 python import sys
 python import vim
@@ -17,7 +29,7 @@ python sys.path.append(vim.eval('expand("<sfile>:h")') + "/..")
 python import vimcryption
 
 " Enable Vimcryption Crypto Functionality 
-function LoadVimcryption()
+function LoadVimcryption(...)
 
     " Disable writing plaintext SWAP/backup/undo files 
     setl noswapfile
@@ -29,7 +41,12 @@ function LoadVimcryption()
     set viminfo=
 
     " Load the python libraries, construct VCFileHandler 
-    python VCF = vimcryption.VCFileHandler()
+    if a:0 > 0
+        let b:vc_cipher_arg = a:1
+        python VCF = vimcryption.VCFileHandler(cipher_type=vim.eval('b:vc_cipher_arg'))
+    else
+        python VCF = vimcryption.VCFileHandler()
+    endif
 
     " Overload the File Access 
     augroup Vimcryption
@@ -45,6 +62,7 @@ endfunction
 
 " Disable vimcryption and unload hooks
 function UnloadVimcryption()
+
     augroup Vimcryption
         au! 
     augroup END 
@@ -56,7 +74,9 @@ function UnloadVimcryption()
 endfunction
 
 " User API 
-command! Vimcrypt call LoadVimcryption() | echo "Vimcryption Enabled!"
 command! NoVimcrypt call UnloadVimcryption() | echo "Vimcryption Disabled!"
+command! -nargs=? Vimcrypt call LoadVimcryption(<f-args>) | echo "Vimcryption Enabled! " . b:vc_cipher_arg
 
-call LoadVimcryption()
+if g:vimcryption_start_onload
+    call LoadVimcryption()
+endif

@@ -16,13 +16,18 @@ def VCPrompt(message):
 
 
 class VCFileHandler():
-    def __init__(self):
+    def __init__(self, cipher_type=None):
         """
         Configurations:
         g:vimcryption_cipher   Default cipher type to use
         """
-        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
         self.cipher_factory = CipherFactory()
+
+        if cipher_type:
+            self.cipher_type = cipher_type
+        else:
+            self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
+            vim.command("let b:vc_cipher_arg = \"" + self.cipher_type + "\"")
 
     def VimCryptionRead(self):
         """
