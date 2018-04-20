@@ -4,14 +4,16 @@
 import vim
 import os
 
-from encryptionengine.engine import CipherFactory, PassThrough
-from encryptionengine.engine import UnsupportedCipherException, NotVimcryptedException
+from encryptionengine.engine import PassThrough
+from encryptionengine.ciphers import CipherFactory, UnsupportedCipherException, NotVimcryptedException
+
 
 def VCPrompt(message):
     vim.command('call inputsave()')
     vim.command("let user_input = input('" + message + " ')")
     vim.command('call inputrestore()')
     return vim.eval('user_input')
+
 
 class VCFileHandler():
     def __init__(self):
@@ -39,7 +41,7 @@ class VCFileHandler():
 
         with open(file_name, 'rb') as current_file:
             try:
-                cipher_engine = self.cipher_factory.getEngineForFile(current_file, input=VCPrompt)
+                cipher_engine = self.cipher_factory.getEngineForFile(current_file, prompt=VCPrompt)
                 self.cipher_type = cipher_engine.cipher_type
             except NotVimcryptedException as e:
                 cipher_engine = PassThrough()
