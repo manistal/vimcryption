@@ -1,7 +1,9 @@
 """
 """
 
+from base64 import b64decode, b64encode
 from functools import reduce
+
 
 __all__ = [
     "EncryptionEngine",
@@ -15,8 +17,9 @@ class EncryptionEngine:
     Base vimcryption encryption engine.
     """
 
-    def __init__(self, prompt=input):
+    def __init__(self, prompt=input, cipher_type=None):
         self.input = prompt
+        self.cipher_type = cipher_type
 
     def encrypt(self, data, fh):
         # type: (Union[List[str], str], io.BytesIO):
@@ -25,6 +28,21 @@ class EncryptionEngine:
     def decrypt(self, fh, data):
         # type: (io.BytesIO, Union[List[str], str]):
         raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
+
+    def readHeader(self, file_handle):
+        """
+        Implement for additional meta-data needed for the cipher implementation
+        """
+        pass
+
+    def writeHeader(self, file_handle):
+        """
+        Requires anyone implementing encryption Engine to 
+        call super.writeHeader()
+        """ 
+        file_handle.seek(0) # Always start at the begginning
+        file_handle.write(b64encode('vimcrypted'))
+        file_handle.write(b64encode(self.cipher_type))
 
 
 class PassThrough(EncryptionEngine):
@@ -44,6 +62,9 @@ class PassThrough(EncryptionEngine):
         for bline in fh:
             line = bline.decode().rstrip("\n")
             data.append(line)
+
+    def writeHeader(self, fh):
+        pass
 
 
 class BlockCipherEngine(EncryptionEngine):

@@ -36,12 +36,3 @@ class TestVCFileHandler(unittest.TestCase):
         self.plaintext_file = BytesIO(b'dmltY3J5cHRlZA==SU9QQVNT\nLOLPLAINTEXT\n')
         self.base64_file = BytesIO(b'dmltY3J5cHRlZA==QkFTRTY0CmxvbApsb2wKbG9sCgo=')
 
-    def test_process_header_plaintext(self):
-        self.VCF.ProcessHeader(self.plaintext_file)
-        self.assertEquals(self.VCF.cipher_type, "IOPASS")
-
-    def test_process_header_base64(self):
-        self.VCF.ProcessHeader(self.base64_file)
-        self.assertEquals(self.VCF.cipher_type, "BASE64")
-
-
