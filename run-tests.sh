@@ -1,6 +1,7 @@
+#!/usr/bin/env bash
 # run-tests.sh
 #
-# Sets up 
+# Sets up and runs unittests in each python environment it detects in the build files.
 
 
 # Wrapper function that squashes stdout
@@ -42,21 +43,25 @@ __get_python_interpreter_path() {
 # Create a new virtual environment for a particular python version
 __setup_venv() {
   local __python
-  rm -rf venv$1
+  # rm -rf venv$1
   __python=$(__get_python_interpreter_path $1)
   if [ "$__python" = "NONE" ] ; then
     __stderr echo "    python$1 not found!"
     exit 1
   else
-    __silence $(dirname $__python)/virtualenv -v -p $__python venv$1
-    if [ "$?" = "0" ] ; then
-      __stderr echo "    python$1 ($__python) -> venv$1"
-      . venv$1/bin/activate
-      pip install .
-    else
-      __stderr echo "    virtualenv executable not found for $__python!"
-      exit 1
+    __virtualenv=$(dirname $__python)/virtualenv
+    __silence $__virtualenv -v -p $__python venv$1
+    if [ "$?" != "0" ] ; then
+      __virtualenv=$(which virtualenv)
+      __silence $__virtualenv -v -p $__python venv$1
+      if [ "$?" != "0" ] ; then
+        __stderr echo "    virtualenv executable not found for $__python!"
+        exit 1
+      fi
     fi
+    __stderr echo "    python$1 ($__python) -> venv$1"
+    . venv$1/bin/activate
+    pip install --force-reinstall .
   fi
   exit 0
 }
@@ -66,11 +71,7 @@ __setup_venv() {
 __do_tests() {
   echo "--Running Python$1 Tests--"
   . venv$1/bin/activate
-  __python=python$1
-  if [ "$1" = "2" ] ; then
-    __python=python
-  fi
-  which $__python
+  __python=$(__get_python_interpreter_path $1)
   nose2 -s test/
   echo "---------Complete---------"
   echo
@@ -110,10 +111,15 @@ elif [ "$1" = "-s" ] ; then
   __prefix="__silence"
 fi
 
+# Enable dot glob so we will see any "hidden" yml files
+shopt -s dotglob
 __versions=($(__parse_yaml *.yml))
+# Disable dot glob
+shopt -u dotglob
+# Get the array of version numbers
 __versions=($(echo "${__versions[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
-echo "Creating Python virtual environments"
+echo "Setting up Python virtual environments"
 
 declare -A __pids
 declare -A __rcs
@@ -132,6 +138,6 @@ echo
 
 for __version in "${!__rcs[@]}" ; do
   if [ "${__rcs[$__version]}" = "0" ] ; then
-    __do_tests $__version
+    __do_tests "$__version"
   fi
 done
