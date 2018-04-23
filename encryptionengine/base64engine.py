@@ -20,6 +20,7 @@ class Base64Engine(BlockCipherEngine):
     """
     encrypt_blocksize = 3
     decrypt_blocksize = 4
+    pad_character = ""
 
     @staticmethod
     def encrypt_block(block):
