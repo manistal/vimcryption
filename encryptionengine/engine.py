@@ -16,6 +16,22 @@ class EncryptionEngine:
     """
     Base vimcryption encryption engine.
     """
+    @staticmethod
+    def buffer_iter(data):
+        #type: List[str]
+        for i, line in enumerate(data):
+            for c in line:
+                yield c
+            if i < len(data):
+                yield "\n"
+
+    @staticmethod
+    def byte_iter(fh):
+        # type: io.ByteIO
+        c = fh.read(1)
+        while c != b"":
+            yield c
+            c = fh.read(1)
 
     def __init__(self, prompt=input, cipher_type=None):
         self.input = prompt
@@ -81,23 +97,6 @@ class BlockCipherEngine(EncryptionEngine):
         `decrypt` based on block iterator
     """
     @staticmethod
-    def buffer_iter(data):
-        #type: List[str]
-        for i, line in enumerate(data):
-            for c in line:
-                yield c
-            if i < len(data):
-                yield "\n"
-
-    @staticmethod
-    def byte_iter(fh):
-        # type: io.ByteIO
-        c = fh.read(1)
-        while c != b"":
-            yield c
-            c = fh.read(1)
-
-    @staticmethod
     def block_iter(generator, block_size, pad):
         # type: (Iterable, int)
         block = []
@@ -117,13 +116,13 @@ class BlockCipherEngine(EncryptionEngine):
             iterable = data
         else:
             iterable = self.buffer_iter(data)
-        for block in self.block_iter(iterable, self.encrypt_blocksize, ""):
+        for block in self.block_iter(iterable, self.encrypt_blocksize, self.pad_character):
             fh.write(self.encrypt_block(block))
 
     def decrypt(self, fh, data):
         # type: (io.BytesIO, Union[Iterable[str], str])
         line = ""
-        for block in self.block_iter(self.byte_iter(fh), self.decrypt_blocksize, b""):
+        for block in self.block_iter(self.byte_iter(fh), self.decrypt_blocksize, self.pad_character.encode()):
             plaintext = self.decrypt_block(block)
             for c in plaintext:
                 if c == "\n":
