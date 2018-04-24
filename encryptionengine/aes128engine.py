@@ -3,6 +3,7 @@ Base64Engine
 """
 from hashlib import sha1
 import numpy as np
+from base64 import b64decode, b64encode
 
 from .engine import BlockCipherEngine
 from .aesutil import *
@@ -21,20 +22,22 @@ class AES128Engine(BlockCipherEngine):
     """
     encrypt_blocksize = 128
     decrypt_blocksize = 128
+    pad_character = "\x00"
 
     round_keys = []
 
     def readHeader(self, file_handle):
-        cipher_key = file_handle.read(16)
+        cipher_key = b64decode(file_handle.read(32))
         user_password = self.input("Enter password: ")
         user_pass_hash = sha1()
-        user_pass_hash = user_pass_hash.update(user_password.encode('utf-8'))
+        user_pass_hash.update(user_password.encode('utf-8'))
         user_pass_hash = user_pass_hash.digest()
-        
+
+        print(user_pass_hash, cipher_key)
         if (user_pass_hash != cipher_key):
             raise IncorrectPasswordException("Wrong password!")
 
-        self.round_keys = AES128Engine.generateRoundKeys(cipher_key)
+        self.round_keys = AES128Engine.generate_round_keys(cipher_key)
 
     def writeHeader(self, file_handle):
         """
@@ -47,11 +50,11 @@ class AES128Engine(BlockCipherEngine):
 
         user_password = self.input("Enter password: ")
         user_pass_hash = sha1()
-        user_pass_hash = user_pass_hash.update(user_password.encode('utf-8'))
+        user_pass_hash.update(user_password.encode('utf-8'))
         user_pass_hash = user_pass_hash.digest()
         file_handle.write(b64encode(user_pass_hash))
 
-        self.round_keys = AES128Engine.generateRoundKeys(user_pass_hash)  
+        self.round_keys = AES128Engine.generate_round_keys(user_pass_hash)  
 
     @staticmethod
     def generate_round_keys(cipher_key):
@@ -185,5 +188,6 @@ class AES128Engine(BlockCipherEngine):
         # Round 10 = No mixing
         state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[0])
 
-        return matrixToBytes(state_matrix)
+        print(matrixToBytes(state_matrix))
+        return matrixToBytes(state_matrix)  
 
