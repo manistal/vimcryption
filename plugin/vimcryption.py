@@ -16,18 +16,18 @@ def VCPrompt(message):
 
 
 class VCFileHandler():
-    def __init__(self, cipher_type=None):
+    def __init__(self):
         """
         Configurations:
         g:vimcryption_cipher   Default cipher type to use
         """
         self.cipher_factory = CipherFactory()
+        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
+        self.cipher_engine = None
 
-        if cipher_type:
-            self.cipher_type = cipher_type
-        else:
-            self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
-            vim.command("let b:vc_cipher_arg = \"" + self.cipher_type + "\"")
+    def setCipher(self, cipher_type):
+        self.cipher_type = cipher_type
+        self.cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
 
     def VimCryptionRead(self):
         """
@@ -46,14 +46,13 @@ class VCFileHandler():
 
         with open(file_name, 'rb') as current_file:
             try:
-                cipher_engine = self.cipher_factory.getEngineForFile(current_file, prompt=VCPrompt)
-                self.cipher_type = cipher_engine.cipher_type
+                self.cipher_engine = self.cipher_factory.getEngineForFile(current_file, prompt=VCPrompt)
+                self.cipher_type = self.cipher_engine.cipher_type
             except NotVimcryptedException as e:
-                cipher_engine = PassThrough()
+                self.cipher_engine = PassThrough()
                 current_file.seek(0) 
 
-            cipher_engine.readHeader(current_file)
-            cipher_engine.decrypt(current_file, vim.current.buffer)
+            self.cipher_engine.decrypt_file(current_file, vim.current.buffer)
 
         # Vim adds an extra line at the top of the NEW buffer 
         del vim.current.buffer[0]
@@ -63,17 +62,17 @@ class VCFileHandler():
 
     def VimCryptionWrite(self, buffer, mode):
         file_name = vim.eval('expand("<amatch>")') 
-        new_file = not os.path.exists(file_name)
+        new_file = (file_name != vim.current.buffer.name) or (not os.path.exists(file_name))
+
+        # If we don't already know what cipher to use ask the Factory
+        if (new_file or (self.cipher_engine is None)):
+            try:
+                self.cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
+            except UnsupportedCipherException as e:
+                self.cipher_engine = PassThrough()
 
         with open(file_name, mode) as current_file:
-            try:
-                cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
-            except UnsupportedCipherException as e:
-                cipher_engine = PassThrough()
-                current_file.seek(0) 
-
-            cipher_engine.writeHeader(current_file)
-            cipher_engine.encrypt(vim.current.buffer, current_file)
+            self.cipher_engine.encrypt_file(vim.current.buffer, current_file)
 
         # Writers must always reset the modified bit
         vim.command(':set nomodified')

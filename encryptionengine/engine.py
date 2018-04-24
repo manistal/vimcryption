@@ -33,9 +33,13 @@ class EncryptionEngine:
             yield c
             c = fh.read(1)
 
-    def __init__(self, prompt=input, cipher_type=None):
+    def __init__(self, prompt=input):
         self.input = prompt
-        self.cipher_type = cipher_type
+        self.cipher_type = self.__class__.__name__[:6].upper()
+        self.cipher_key = self.get_cipher_key()
+
+    def get_cipher_key(self):
+        return ""
 
     def encrypt(self, data, fh):
         # type: (Union[List[str], str], io.BytesIO):
@@ -45,18 +49,25 @@ class EncryptionEngine:
         # type: (io.BytesIO, Union[List[str], str]):
         raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
 
-    def readHeader(self, file_handle):
+    def encrypt_file(self, data, fh):
+        self.write_header(fh)
+        self.encrypt(data, fh)
+
+    def decrypt_file(self, fh, data):
+        self.read_header(fh)
+        self.decrypt(fh, data)
+
+    def read_header(self, file_handle):
         """
         Implement for additional meta-data needed for the cipher implementation
         """
         pass
 
-    def writeHeader(self, file_handle):
+    def write_header(self, file_handle):
         """
         Requires anyone implementing encryption Engine to 
         call super.writeHeader()
         """ 
-        file_handle.seek(0) # Always start at the begginning
         file_handle.write(b64encode('vimcrypted'))
         file_handle.write(b64encode(self.cipher_type))
 
@@ -79,7 +90,7 @@ class PassThrough(EncryptionEngine):
             line = bline.decode().rstrip("\n")
             data.append(line)
 
-    def writeHeader(self, fh):
+    def write_header(self, fh):
         pass
 
 

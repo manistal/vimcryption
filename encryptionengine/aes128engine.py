@@ -26,17 +26,19 @@ class AES128Engine(BlockCipherEngine):
 
     round_keys = []
 
-    def readHeader(self, file_handle):
-        cipher_key = file_handle.read(32)
+    def get_cipher_key(self):
         user_password = self.input("Enter password: ")
-        user_pass_hash = hashlib.pbkdf2_hmac('sha256', user_password, '1', 10)
+        return hashlib.pbkdf2_hmac('sha256', user_password, '1', 10)
 
-        if (user_pass_hash != cipher_key):
+    def read_header(self, file_handle):
+        header_key = file_handle.read(32)
+
+        if (self.cipher_key != header_key):
             raise IncorrectPasswordException("Wrong password!")
 
-        self.round_keys = AES128Engine.generate_round_keys(cipher_key)
+        self.round_keys = AES128Engine.generate_round_keys(self.cipher_key)
 
-    def writeHeader(self, file_handle):
+    def write_header(self, file_handle):
         """
         Requires anyone implementing encryption Engine to 
         call super.writeHeader()
@@ -45,11 +47,12 @@ class AES128Engine(BlockCipherEngine):
         file_handle.write(b64encode('vimcrypted'))
         file_handle.write(b64encode("AES128"))
 
-        user_password = self.input("Enter password: ")
-        user_pass_hash = hashlib.pbkdf2_hmac('sha256', user_password, '1', 10)
-        file_handle.write(user_pass_hash)#b64encode(user_pass_hash))
+        if self.cipher_key is None:
+            self.cipher_key = self.get_cipher_key()
 
-        self.round_keys = AES128Engine.generate_round_keys(user_pass_hash)  
+        file_handle.write(self.cipher_key)
+
+        self.round_keys = AES128Engine.generate_round_keys(self.cipher_key)
 
     @staticmethod
     def generate_round_keys(cipher_key):

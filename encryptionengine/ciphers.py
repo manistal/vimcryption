@@ -32,7 +32,7 @@ class CipherFactory:
     def getEngineForCipher(self, cipher_type, prompt=input):
         if cipher_type not in self.CIPHERS:
             raise UnsupportedCipherException("Tried to construct unsupported cipher: " + cipher_type)
-        return self.CIPHERS[cipher_type](prompt=prompt, cipher_type=cipher_type)
+        return self.CIPHERS[cipher_type](prompt=prompt)
 
     def getEngineForFile(self, file_handle, prompt=input):
         """ Process vimcryption header

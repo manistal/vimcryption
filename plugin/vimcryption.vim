@@ -41,11 +41,12 @@ function LoadVimcryption(...)
     set viminfo=
 
     " Load the python libraries, construct VCFileHandler 
+    python VCF = vimcryption.VCFileHandler()
+
+    " If we're given a cipher type, tell VCF to initialize it
     if a:0 > 0
         let b:vc_cipher_arg = a:1
-        python VCF = vimcryption.VCFileHandler(cipher_type=vim.eval('b:vc_cipher_arg'))
-    else
-        python VCF = vimcryption.VCFileHandler()
+        python VCF.setCipher(vim.eval('b:vc_cipher_arg'))
     endif
 
     " Overload the File Access 
