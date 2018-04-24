@@ -111,14 +111,18 @@ class VCFileHandler():
         BufReadCmd: Before starting to edit a new buffer.  
         Should read the file into the buffer. 
         """
+        vim.command('exe "silent doau BufReadPre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionRead()        
+        vim.command('exe "silent doau BufReadPost ".fnameescape(expand("<amatch>"))')
 
     def FileRead(self):
         """
         FileReadCmd: Before reading a file with a ":read" command.
         Should do the reading of the file.
         """
+        vim.command('exe "silent doau FileReadPre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionRead()        
+        vim.command('exe "silent doau FileReadPost ".fnameescape(expand("<amatch>"))')
 
     def BufWrite(self):
         """
@@ -126,7 +130,9 @@ class VCFileHandler():
         Should do the writing of the file and reset 'modified' if successful, unless '+' is in
         'cpo' and writing to another file |cpo-+|. The buffer contents should not be changed.
         """
+        vim.command('exe "silent doau BufWritePre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionWrite(vim.current.buffer, 'wb+')
+        vim.command('exe "silent doau BufWritePost ".fnameescape(expand("<amatch>"))')
 
     def FileWrite(self):
         """
@@ -138,7 +144,9 @@ class VCFileHandler():
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
+        vim.command('exe "silent doau FileWritePre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionWrite(current_range, 'wb+')
+        vim.command('exe "silent doau FileWritePost ".fnameescape(expand("<amatch>"))')
 
     def FileAppend(self):
         """
