@@ -4,6 +4,7 @@ AES Encryption Algorithm Utilities
 """
 
 import numpy as np
+from functools import reduce
 
 
 __all__ = [
@@ -30,11 +31,11 @@ def bytesToMatrix(byte_str):
     return matrix
 
 def matrixToBytes(matrix):
-    byte_str = b""
+    byte_str = []
     for column in range(0, 4):
         for row in range(0, 4):
-            byte_str += chr(matrix[row, column])
-    return byte_str
+            byte_str.append(chr(matrix[row, column]))
+    return reduce(lambda a, b: a + b, byte_str)
 
 def matrixToString(matrix):
     byte_str = ""

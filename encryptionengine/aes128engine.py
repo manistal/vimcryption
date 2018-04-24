@@ -30,7 +30,7 @@ class AES128Engine(BlockCipherEngine):
 
     def get_cipher_key(self):
         user_password = self.input("Enter password: ")
-        return hashlib.pbkdf2_hmac('sha256', user_password, '1', 10)
+        return hashlib.pbkdf2_hmac('sha256', user_password.encode("utf8"), b'1', 10)
 
     def read_header(self, file_handle):
         header_key = file_handle.read(32)
