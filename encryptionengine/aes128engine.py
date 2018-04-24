@@ -1,7 +1,7 @@
 """
 Base64Engine
 """
-from hashlib import sha1
+import hashlib
 import numpy as np
 from base64 import b64decode, b64encode
 
@@ -20,20 +20,17 @@ class AES128Engine(BlockCipherEngine):
       The 6-bit character set is used is A-Z, a-z, + and /.
       Data is padded with =.
     """
-    encrypt_blocksize = 128
-    decrypt_blocksize = 128
+    encrypt_blocksize = 16
+    decrypt_blocksize = 16
     pad_character = "\x00"
 
     round_keys = []
 
     def readHeader(self, file_handle):
-        cipher_key = b64decode(file_handle.read(32))
+        cipher_key = file_handle.read(32)
         user_password = self.input("Enter password: ")
-        user_pass_hash = sha1()
-        user_pass_hash.update(user_password.encode('utf-8'))
-        user_pass_hash = user_pass_hash.digest()
+        user_pass_hash = hashlib.pbkdf2_hmac('sha256', user_password, '1', 10)
 
-        print(user_pass_hash, cipher_key)
         if (user_pass_hash != cipher_key):
             raise IncorrectPasswordException("Wrong password!")
 
@@ -49,10 +46,8 @@ class AES128Engine(BlockCipherEngine):
         file_handle.write(b64encode("AES128"))
 
         user_password = self.input("Enter password: ")
-        user_pass_hash = sha1()
-        user_pass_hash.update(user_password.encode('utf-8'))
-        user_pass_hash = user_pass_hash.digest()
-        file_handle.write(b64encode(user_pass_hash))
+        user_pass_hash = hashlib.pbkdf2_hmac('sha256', user_password, '1', 10)
+        file_handle.write(user_pass_hash)#b64encode(user_pass_hash))
 
         self.round_keys = AES128Engine.generate_round_keys(user_pass_hash)  
 
@@ -188,6 +183,5 @@ class AES128Engine(BlockCipherEngine):
         # Round 10 = No mixing
         state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[0])
 
-        print(matrixToBytes(state_matrix))
-        return matrixToBytes(state_matrix)  
+        return matrixToBytes(state_matrix).replace(self.pad_character, '')  
 
