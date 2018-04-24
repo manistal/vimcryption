@@ -9,7 +9,7 @@ import numpy as np
 __all__ = [
     "IncorrectPasswordException",
     "AES_SBOX", "AES_SBOX_INV", "AES_RCON",
-    "GMUL_BY2", "GMUL_BY3", 
+    "GMUL_BY2", "GMUL_BY3", "GMUL_BY9", 
     "GMUL_BY11", "GMUL_BY13", "GMUL_BY14", 
     "AESMatrix", "bytesToMatrix", "matrixToString", "matrixToBytes"
 ]

@@ -195,3 +195,14 @@ class TestAES128Engine(unittest.TestCase):
         ciphertext = aes128.encrypt_block(plaintext_block)
 
         self.assertEqual(ciphertext, expected_ciphertext)
+
+    def test_decrypt_str(self):
+        cipher_key = "\x54\x68\x61\x74\x73\x20\x6D\x79\x20\x4B\x75\x6E\x67\x20\x46\x75"
+        plaintext_block = "\x54\x77\x6F\x20\x4F\x6E\x65\x20\x4E\x69\x6E\x65\x20\x54\x77\x6F"  
+
+        aes128 = AES128Engine()
+        aes128.round_keys = AES128Engine.generate_round_keys(cipher_key)
+        ciphertext = aes128.encrypt_block(plaintext_block)
+        plaintext_result = aes128.decrypt_block(ciphertext)
+
+        self.assertEqual(plaintext_block, plaintext_result)

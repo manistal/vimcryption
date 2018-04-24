@@ -34,7 +34,7 @@ class AES128Engine(BlockCipherEngine):
         if (user_pass_hash != cipher_key):
             raise IncorrectPasswordException("Wrong password!")
 
-        self.generateRoundKeys(cipher_key)
+        self.round_keys = AES128Engine.generateRoundKeys(cipher_key)
 
     def writeHeader(self, file_handle):
         """
@@ -44,8 +44,14 @@ class AES128Engine(BlockCipherEngine):
         file_handle.seek(0) # Always start at the begginning
         file_handle.write(b64encode('vimcrypted'))
         file_handle.write(b64encode("AES128"))
+
         user_password = self.input("Enter password: ")
-        file_handle.write(b64encode(user_password))
+        user_pass_hash = sha1()
+        user_pass_hash = user_pass_hash.update(user_password.encode('utf-8'))
+        user_pass_hash = user_pass_hash.digest()
+        file_handle.write(b64encode(user_pass_hash))
+
+        self.round_keys = AES128Engine.generateRoundKeys(user_pass_hash)  
 
     @staticmethod
     def generate_round_keys(cipher_key):
@@ -113,6 +119,34 @@ class AES128Engine(BlockCipherEngine):
             result_matrix[:, column] = AES128Engine.mix_column(state_matrix[:, column].flat)
         return result_matrix
 
+    @staticmethod
+    def nibble_substitution_inv(state_matrix):
+        sbox_substitute = np.vectorize(AES_SBOX_INV.__getitem__)
+        return sbox_substitute(state_matrix)
+
+    @staticmethod
+    def shift_rows_inv(state_matrix):
+        result_matrix = AESMatrix()  # Operation below is destructive!
+        for row in range(0, 4):
+            result_matrix[row, :] = np.roll(state_matrix[row].flat, row)
+        return result_matrix
+    
+    @staticmethod
+    def mix_column_inv(column):
+        result_column = np.zeros((4, 1), dtype=int)
+        result_column[0] = GMUL_BY14[column[0]] ^ GMUL_BY11[column[1]] ^ GMUL_BY13[column[2]] ^  GMUL_BY9[column[3]]
+        result_column[1] =  GMUL_BY9[column[0]] ^ GMUL_BY14[column[1]] ^ GMUL_BY11[column[2]] ^ GMUL_BY13[column[3]]
+        result_column[2] = GMUL_BY13[column[0]] ^  GMUL_BY9[column[1]] ^ GMUL_BY14[column[2]] ^ GMUL_BY11[column[3]]
+        result_column[3] = GMUL_BY11[column[0]] ^ GMUL_BY13[column[1]] ^  GMUL_BY9[column[2]] ^ GMUL_BY14[column[3]]
+        return result_column
+
+    @staticmethod
+    def mix_columns_inv(state_matrix):
+        result_matrix = AESMatrix()
+        for column in range(0, 4):
+            result_matrix[:, column] = AES128Engine.mix_column_inv(state_matrix[:, column].flat)
+        return result_matrix
+
     def encrypt_block(self, block):
         state_matrix = bytesToMatrix(block)
 
@@ -133,6 +167,23 @@ class AES128Engine(BlockCipherEngine):
 
         return matrixToBytes(state_matrix)
 
-    @staticmethod
-    def decrypt_block(block):
-        return ""
+    def decrypt_block(self, block):
+        state_matrix = bytesToMatrix(block)
+
+        # Round 0 = Do the last stage of encryption backwards
+        state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[10])
+        state_matrix = AES128Engine.shift_rows_inv(state_matrix)
+        state_matrix = AES128Engine.nibble_substitution_inv(state_matrix)
+        
+        # Round 1 - 9 = AES
+        for round_key in self.round_keys[9:0:-1]:
+            state_matrix = AES128Engine.add_round_key(state_matrix, round_key)
+            state_matrix = AES128Engine.mix_columns_inv(state_matrix)
+            state_matrix = AES128Engine.shift_rows_inv(state_matrix)
+            state_matrix = AES128Engine.nibble_substitution_inv(state_matrix)
+
+        # Round 10 = No mixing
+        state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[0])
+
+        return matrixToBytes(state_matrix)
+
