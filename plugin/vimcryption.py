@@ -10,7 +10,7 @@ from encryptionengine.ciphers import CipherFactory, UnsupportedCipherException, 
 
 def VCPrompt(message):
     vim.command('call inputsave()')
-    vim.command("let user_input = input('" + message + " ')")
+    vim.command("let user_input = inputsecret('" + message + " ')")
     vim.command('call inputrestore()')
     return vim.eval('user_input')
 
@@ -60,12 +60,15 @@ class VCFileHandler():
         # Relock read-only buffers  before user gets it
         if not modifiable: vim.command(":set noma")
 
+        # Redraw after we've loaded to clear out old stuff
+        vim.command(":redraw!")
+
     def VimCryptionWrite(self, buffer, mode):
         file_name = vim.eval('expand("<amatch>")') 
         new_file = (file_name != vim.current.buffer.name) or (not os.path.exists(file_name))
 
         # If we don't already know what cipher to use ask the Factory
-        if (new_file or (self.cipher_engine is None)):
+        if (new_file and (self.cipher_engine is None)):
             try:
                 self.cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
             except UnsupportedCipherException as e:

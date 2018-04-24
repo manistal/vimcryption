@@ -59,6 +59,13 @@ function LoadVimcryption(...)
         au FileAppendCmd *    py VCF.FileAppend()
     augroup END 
 
+    if !exists("b:vimcryption_loaded")
+        let b:vimcryption_loaded = 1
+    else
+        redraw!
+        echo "Vimcryption Enabled! " . b:vc_cipher_arg
+    endif
+
 endfunction
 
 " Disable vimcryption and unload hooks
@@ -72,11 +79,13 @@ function UnloadVimcryption()
     setl undofile
     setl backup
     " set viminfo= &vc_origin_viminfo
+
+    echo "Vimcryption Disabled!"
 endfunction
 
 " User API 
-command! NoVimcrypt call UnloadVimcryption() | echo "Vimcryption Disabled!"
-command! -nargs=? Vimcrypt call LoadVimcryption(<f-args>) | echo "Vimcryption Enabled! " . b:vc_cipher_arg
+command! NoVimcrypt call UnloadVimcryption() 
+command! -nargs=? Vimcrypt call LoadVimcryption(<f-args>) 
 
 if g:vimcryption_start_onload
     call LoadVimcryption()
