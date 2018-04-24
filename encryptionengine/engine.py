@@ -12,73 +12,9 @@ __all__ = [
 ]
 
 
-class EncryptionEngine:
+class EncryptionEngine(object):
     """
     Base vimcryption encryption engine.
-    """
-
-    def __init__(self, prompt=input, cipher_type=None):
-        self.input = prompt
-        self.cipher_type = cipher_type
-
-    def encrypt(self, data, fh):
-        # type: (Union[List[str], str], io.BytesIO):
-        raise NotImplementedError("IOBase.encrypt must be implemented by a derived class!")
-
-    def decrypt(self, fh, data):
-        # type: (io.BytesIO, Union[List[str], str]):
-        raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
-
-    def readHeader(self, file_handle):
-        """
-        Implement for additional meta-data needed for the cipher implementation
-        """
-        pass
-
-    def writeHeader(self, file_handle):
-        """
-        Requires anyone implementing encryption Engine to 
-        call super.writeHeader()
-        """ 
-        file_handle.seek(0) # Always start at the begginning
-        file_handle.write(b64encode('vimcrypted'))
-        file_handle.write(b64encode(self.cipher_type))
-
-
-class PassThrough(EncryptionEngine):
-    """
-    Simple pass-through engine.
-    """
-    def encrypt(self, data, fh):
-        # type: (Union[List[str], str], io.BytesIO):
-        if isinstance(data, str):
-            fh.write((data + "\n").encode("utf8"))
-        else:
-            for item in data:
-                fh.write((item + "\n").encode("utf8"))
-
-    def decrypt(self, fh, data):
-        # type: (io.BytesIO, Union[List[str], str]):
-        for bline in fh:
-            line = bline.decode().rstrip("\n")
-            data.append(line)
-
-    def writeHeader(self, fh):
-        pass
-
-
-class BlockCipherEngine(EncryptionEngine):
-    """
-    Base class for block ciphers.  Provides generic API for common utilities.
-        Derived classes MUST define `self.encrypt_blocksize` and `self.decrypt_blocksize`
-        in order to use the default encrypt/decrypt functions.  Derived classes
-        may implement `encrypt` and `decrypt` instead.
-    Supplied methods:
-        Buffer iterator generator function
-        BytesIO iterator generator function
-        Block iterator generator function
-        `encrypt` based on Block iterator
-        `decrypt` based on block iterator
     """
     @staticmethod
     def buffer_iter(data):
@@ -97,6 +33,93 @@ class BlockCipherEngine(EncryptionEngine):
             yield c
             c = fh.read(1)
 
+    def __init__(self, prompt=input):
+        self.input = prompt
+        self.cipher_type = self.__class__.__name__[:6].upper()
+        self.cipher_key = self.get_cipher_key()
+
+    def get_cipher_key(self):
+        return ""
+
+    def encrypt(self, data, fh):
+        # type: (Union[List[str], str], io.BytesIO):
+        raise NotImplementedError("IOBase.encrypt must be implemented by a derived class!")
+
+    def decrypt(self, fh, data):
+        # type: (io.BytesIO, Union[List[str], str]):
+        raise NotImplementedError("IOBase.decrypt must be implemented by a derived class!")
+
+    def encrypt_file(self, data, fh):
+        self.write_header(fh)
+        self.encrypt(data, fh)
+
+    def decrypt_file(self, fh, data):
+        self.read_header(fh)
+        self.decrypt(fh, data)
+
+    def read_header(self, file_handle):
+        """
+        Implement for additional meta-data needed for the cipher implementation
+        """
+        pass
+
+    def write_header(self, file_handle):
+        """
+        Requires anyone implementing encryption Engine to 
+        call super.writeHeader()
+        """ 
+        file_handle.write(b64encode('vimcrypted'))
+        file_handle.write(b64encode(self.cipher_type))
+
+
+class PassThrough(EncryptionEngine):
+    """
+    Simple pass-through engine.
+    """
+    def encrypt(self, data, fh):
+        # type: (Union[List[str], str], io.BytesIO):
+        if isinstance(data, str):
+            fh.write((data + "\n").encode("utf8"))
+        else:
+            for item in data:
+                fh.write((item + "\n").encode("utf8"))
+
+    def decrypt(self, fh, data):
+        # type: (io.BytesIO, Union[List[str], str]):
+        line = ""
+        for bchar in self.byte_iter(fh):
+            char = ""
+            try:
+                char = bchar.decode("utf8")
+            except UnicodeDecodeError:
+                char = "?"
+
+            if char == "\n":
+                data.append(line)
+                line = ""
+            else:
+                line += char
+
+        if line != "":
+            data.append(line)
+
+    def write_header(self, fh):
+        pass
+
+
+class BlockCipherEngine(EncryptionEngine):
+    """
+    Base class for block ciphers.  Provides generic API for common utilities.
+        Derived classes MUST define `self.encrypt_blocksize` and `self.decrypt_blocksize`
+        in order to use the default encrypt/decrypt functions.  Derived classes
+        may implement `encrypt` and `decrypt` instead.
+    Supplied methods:
+        Buffer iterator generator function
+        BytesIO iterator generator function
+        Block iterator generator function
+        `encrypt` based on Block iterator
+        `decrypt` based on block iterator
+    """
     @staticmethod
     def block_iter(generator, block_size, pad):
         # type: (Iterable, int)
@@ -117,13 +140,13 @@ class BlockCipherEngine(EncryptionEngine):
             iterable = data
         else:
             iterable = self.buffer_iter(data)
-        for block in self.block_iter(iterable, self.encrypt_blocksize, ""):
+        for block in self.block_iter(iterable, self.encrypt_blocksize, self.pad_character):
             fh.write(self.encrypt_block(block))
 
     def decrypt(self, fh, data):
         # type: (io.BytesIO, Union[Iterable[str], str])
         line = ""
-        for block in self.block_iter(self.byte_iter(fh), self.decrypt_blocksize, b""):
+        for block in self.block_iter(self.byte_iter(fh), self.decrypt_blocksize, self.pad_character.encode()):
             plaintext = self.decrypt_block(block)
             for c in plaintext:
                 if c == "\n":
