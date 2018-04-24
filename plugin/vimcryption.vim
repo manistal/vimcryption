@@ -40,16 +40,16 @@ function LoadVimcryption(...)
     " let g:vc_original_viminfo = &viminfo
     set viminfo=
 
-    " Load the python libraries, construct VCFileHandler 
+    " Construct a new VCFileHandler when VC Loads
     python VCF = vimcryption.VCFileHandler()
 
-    " If we're given a cipher type, tell VCF to initialize it
+    " If we're given a cipher type from the user, tell VCF to initialize it
     if a:0 > 0
         let b:vc_cipher_arg = a:1
         python VCF.setCipher(vim.eval('b:vc_cipher_arg'))
     endif
 
-    " Overload the File Access 
+    " Overload the File Accessors with our VCF Callbacks
     augroup Vimcryption
         au! 
         au BufReadCmd    *    py VCF.BufRead()
