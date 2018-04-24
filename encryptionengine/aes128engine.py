@@ -24,7 +24,9 @@ class AES128Engine(BlockCipherEngine):
     decrypt_blocksize = 16
     pad_character = "\x00"
 
-    round_keys = []
+    def __init__(self, *args, **kwargs):
+        super(AES128Engine, self).__init__(*args, **kwargs)
+        self.round_keys = []
 
     def get_cipher_key(self):
         user_password = self.input("Enter password: ")
@@ -33,7 +35,9 @@ class AES128Engine(BlockCipherEngine):
     def read_header(self, file_handle):
         header_key = file_handle.read(32)
 
-        if (self.cipher_key != header_key):
+        # Key is hashed securely! Compare against hash
+        if (hashlib.sha256(self.cipher_key).digest() != header_key):
+            file_handle.seek(-32, 1)  # Reverse earlier file read back to where it was 
             raise IncorrectPasswordException("Wrong password!")
 
         self.round_keys = AES128Engine.generate_round_keys(self.cipher_key)
@@ -50,7 +54,9 @@ class AES128Engine(BlockCipherEngine):
         if self.cipher_key is None:
             self.cipher_key = self.get_cipher_key()
 
-        file_handle.write(self.cipher_key)
+        # Don't write plain keys!! Hash them first!
+        key_hash = hashlib.sha256(self.cipher_key).digest()
+        file_handle.write(key_hash)
 
         self.round_keys = AES128Engine.generate_round_keys(self.cipher_key)
 

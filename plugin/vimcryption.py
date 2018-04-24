@@ -1,11 +1,13 @@
 """
 """
+from time import sleep
 
 import vim
 import os
 
 from encryptionengine.engine import PassThrough
 from encryptionengine.ciphers import CipherFactory, UnsupportedCipherException, NotVimcryptedException
+from encryptionengine.aesutil import IncorrectPasswordException
 
 
 def VCPrompt(message):
@@ -52,7 +54,25 @@ class VCFileHandler():
                 self.cipher_engine = PassThrough()
                 current_file.seek(0) 
 
-            self.cipher_engine.decrypt_file(current_file, vim.current.buffer)
+            retries = 0
+            while True:
+                try:
+                    self.cipher_engine.decrypt_file(current_file, vim.current.buffer)
+                    break
+
+                except IncorrectPasswordException as e:
+                    retries += 1
+                    if (retries >= 3):
+                        print("Incorrect Password, Max Tries Reached, Showing Encrypted Content")
+                        current_file.seek(0)
+                        self.cipher_engine = PassThrough()
+                        self.cipher_engine.decrypt_file(current_file, vim.current.buffer)
+                        modifiable = False
+                        break
+                    else:
+                        print("Incorrect Password")
+                        self.cipher_engine.cipher_key = self.cipher_engine.get_cipher_key()
+
 
         # Vim adds an extra line at the top of the NEW buffer 
         del vim.current.buffer[0]

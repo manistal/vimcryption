@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 
-class EncryptionEngine:
+class EncryptionEngine(object):
     """
     Base vimcryption encryption engine.
     """
@@ -86,8 +86,21 @@ class PassThrough(EncryptionEngine):
 
     def decrypt(self, fh, data):
         # type: (io.BytesIO, Union[List[str], str]):
-        for bline in fh:
-            line = bline.decode().rstrip("\n")
+        line = ""
+        for bchar in self.byte_iter(fh):
+            char = ""
+            try:
+                char = bchar.decode("utf8")
+            except UnicodeDecodeError:
+                char = "?"
+
+            if char == "\n":
+                data.append(line)
+                line = ""
+            else:
+                line += char
+
+        if line != "":
             data.append(line)
 
     def write_header(self, fh):
