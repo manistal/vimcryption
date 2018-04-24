@@ -22,6 +22,8 @@ class AES128Engine(BlockCipherEngine):
     encrypt_blocksize = 128
     decrypt_blocksize = 128
 
+    round_keys = []
+
     def readHeader(self, file_handle):
         cipher_key = file_handle.read(16)
         user_password = self.input("Enter password: ")
@@ -111,9 +113,25 @@ class AES128Engine(BlockCipherEngine):
             result_matrix[:, column] = AES128Engine.mix_column(state_matrix[:, column].flat)
         return result_matrix
 
-    @staticmethod
-    def encrypt_block(block):
-        return ""
+    def encrypt_block(self, block):
+        state_matrix = bytesToMatrix(block)
+
+        # Round 0 = Just add round key
+        state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[0])
+        
+        # Round 1 - 9 = AES
+        for round_key in self.round_keys[1:10]:
+            state_matrix = AES128Engine.nibble_substitution(state_matrix)
+            state_matrix = AES128Engine.shift_rows(state_matrix)
+            state_matrix = AES128Engine.mix_columns(state_matrix)
+            state_matrix = AES128Engine.add_round_key(state_matrix, round_key)
+
+        # Round 10 = No mixing
+        state_matrix = AES128Engine.nibble_substitution(state_matrix)
+        state_matrix = AES128Engine.shift_rows(state_matrix)
+        state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[10])
+
+        return matrixToString(state_matrix)
 
     @staticmethod
     def decrypt_block(block):
