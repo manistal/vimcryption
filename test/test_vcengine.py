@@ -146,12 +146,33 @@ class TestAES128Engine(unittest.TestCase):
             "bfe2bf904559fab2a16480b4f7f1cbd8",
             "28fddef86da4244accc0a4fe3b316f26"
         ]
-        round_keys = AES128Engine.generateRoundKeys(cipher_key)
+        round_keys = AES128Engine.generate_round_keys(cipher_key)
         for round_idx, key in enumerate(round_keys):
-            key_bytes = ""
-            for column in range(0, 4):
-                for row in range(0, 4):
-                    key_bytes += "{:02x}".format(int(key[row, column]))
+            key_string = aesutil.matrixToString(key)
+            self.assertEqual(key_string, expected_keys[round_idx])
 
-            self.assertEqual(key_bytes, expected_keys[round_idx])
 
+    def test_add_round_key(self):
+        state_matrix = aesutil.bytesToMatrix("\x54\x77\x6F\x20\x4F\x6E\x65\x20\x4E\x69\x6E\x65\x20\x54\x77\x6F")
+        round_key = aesutil.bytesToMatrix("\x54\x68\x61\x74\x73\x20\x6D\x79\x20\x4B\x75\x6E\x67\x20\x46\x75") 
+        expected_matrix = aesutil.bytesToMatrix("\x00\x1F\x0E\x54\x3C\x4E\x08\x59\x6E\x22\x1B\x0B\x47\x74\x31\x1A")
+
+        result_matrix = AES128Engine.add_round_key(state_matrix, round_key)
+
+        np.testing.assert_array_equal(expected_matrix, result_matrix)
+
+    def test_nibble_substitution(self):
+        state_matrix = aesutil.bytesToMatrix("\x00\x1F\x0E\x54\x3C\x4E\x08\x59\x6E\x22\x1B\x0B\x47\x74\x31\x1A")
+        expected_matrix = aesutil.bytesToMatrix("\x63\xC0\xAB\x20\xEB\x2F\x30\xCB\x9F\x93\xAF\x2B\xA0\x92\xC7\xA2")
+
+        result_matrix = AES128Engine.nibble_substitution(state_matrix)
+
+        np.testing.assert_array_equal(expected_matrix, result_matrix)
+
+    def test_shift_rows(self):
+        state_matrix = aesutil.bytesToMatrix("\x63\xC0\xAB\x20\xEB\x2F\x30\xCB\x9F\x93\xAF\x2B\xA0\x92\xC7\xA2")
+        expected_matrix = aesutil.bytesToMatrix("\x63\x2F\xAF\xA2\xEB\x93\xC7\x20\x9F\x92\xAB\xCB\xA0\xC0\x30\x2B")
+
+        result_matrix = AES128Engine.shift_rows(state_matrix)
+
+        np.testing.assert_array_equal(expected_matrix, result_matrix)

@@ -46,7 +46,7 @@ class AES128Engine(BlockCipherEngine):
         file_handle.write(b64encode(user_password))
 
     @staticmethod
-    def generateRoundKeys(cipher_key):
+    def generate_round_keys(cipher_key):
         key_matrix = bytesToMatrix(cipher_key)
 
         # 11 Rounds of Encyrption 
@@ -77,6 +77,27 @@ class AES128Engine(BlockCipherEngine):
             round_keys.append(new_key_matrix)
 
         return round_keys
+
+    @staticmethod
+    def add_round_key(state_matrix, round_key):
+        return np.bitwise_xor(state_matrix, round_key)
+
+    @staticmethod
+    def nibble_substitution(state_matrix):
+        sbox_substitute = np.vectorize(AES_SBOX.__getitem__)
+        return sbox_substitute(state_matrix)
+
+    @staticmethod
+    def shift_rows(state_matrix):
+        result_matrix = AESMatrix()  # Operation below is destructive!
+        for row in range(0,4):
+            # *NOTE* NP defaults to backwards roll, need Forwards roll
+            result_matrix[row, :] = np.roll(state_matrix[row].flat, -1 * row)
+        return result_matrix
+    
+    @staticmethod
+    def mix_columns(state_matrix):
+        pass
 
     @staticmethod
     def encrypt_block(block):

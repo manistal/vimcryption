@@ -29,6 +29,14 @@ def bytesToMatrix(byte_str):
             matrix[row, col] = ord(byte_str[(col * 4) + row])
     return matrix
 
+def matrixToString(matrix):
+    byte_str = ""
+    for column in range(0, 4):
+        for row in range(0, 4):
+            byte_str += "{:02x}".format(int(matrix[row, column]))
+    return byte_str
+
+
 # SBoxes for Nibble Substitution
 # =====================================
 AES_SBOX = [
