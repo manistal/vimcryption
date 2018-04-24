@@ -3,9 +3,31 @@ AES Encryption Algorithm Utilities
  needed for aes128 and 256 engines
 """
 
+import numpy as np
+
+
+__all__ = [
+    "IncorrectPasswordException",
+    "AES_SBOX", "AES_SBOX_INV", "AES_RCON",
+    "GMUL_BY2", "GMUL_BY3", 
+    "GMUL_BY11", "GMUL_BY13", "GMUL_BY14", 
+    "AESMatrix", "bytesToMatrix"
+]
+
+
 class IncorrectPasswordException(Exception):
     pass
 
+
+def AESMatrix():
+    return np.matrix(np.zeros((4, 4), dtype=int))
+
+def bytesToMatrix(byte_str):
+    matrix = AESMatrix()
+    for col in range(0, 4):
+        for row in range(0, 4):
+            matrix[row, col] = ord(byte_str[(col * 4) + row])
+    return matrix
 
 # SBoxes for Nibble Substitution
 # =====================================
@@ -183,6 +205,7 @@ GMUL_BY14 = [
 ]
 
 # Just in case we want to use other bases
+# Not included in ALL
 def GaloisMult(lhs, rhs):
     ret_value = 0
     lhs_high_bit = False
@@ -199,4 +222,5 @@ def GaloisMult(lhs, rhs):
       rhs >>= 1;
 
     return ret_value % 256 
+
 

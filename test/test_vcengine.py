@@ -6,6 +6,7 @@ import io
 import random
 import string
 import unittest
+import numpy as np
 
 from encryptionengine import *
 
@@ -120,3 +121,37 @@ class TestBase64Engine(unittest.TestCase):
         decrypted_strings = []
         Base64Engine().decrypt(fh, decrypted_strings)
         self.assertEqual(self.test_strings, decrypted_strings)
+
+
+class TestAES128Engine(unittest.TestCase):
+    """
+    Unit tests for AES128
+    """
+    def setUp(self):
+        self.zero_hash = '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        self.zero_matrix = np.matrix(np.zeros((4, 4), dtype=int))
+
+    def test_round_key_gen(self):
+        cipher_key = "\x54\x68\x61\x74\x73\x20\x6D\x79\x20\x4B\x75\x6E\x67\x20\x46\x75"
+        expected_keys = [
+            "5468617473206d79204b756e67204675",
+            "e232fcf191129188b159e4e6d679a293",
+            "56082007c71ab18f76435569a03af7fa",
+            "d2600de7157abc686339e901c3031efb",
+            "a11202c9b468bea1d75157a01452495b",
+            "b1293b3305418592d210d232c6429b69",
+            "bd3dc287b87c47156a6c9527ac2e0e4e",
+            "cc96ed1674eaaa031e863f24b2a8316a",
+            "8e51ef21fabb4522e43d7a0656954b6c",
+            "bfe2bf904559fab2a16480b4f7f1cbd8",
+            "28fddef86da4244accc0a4fe3b316f26"
+        ]
+        round_keys = AES128Engine.generateRoundKeys(cipher_key)
+        for round_idx, key in enumerate(round_keys):
+            key_bytes = ""
+            for column in range(0, 4):
+                for row in range(0, 4):
+                    key_bytes += "{:02x}".format(int(key[row, column]))
+
+            self.assertEqual(key_bytes, expected_keys[round_idx])
+
