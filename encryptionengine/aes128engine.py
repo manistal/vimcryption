@@ -90,14 +90,26 @@ class AES128Engine(BlockCipherEngine):
     @staticmethod
     def shift_rows(state_matrix):
         result_matrix = AESMatrix()  # Operation below is destructive!
-        for row in range(0,4):
+        for row in range(0, 4):
             # *NOTE* NP defaults to backwards roll, need Forwards roll
             result_matrix[row, :] = np.roll(state_matrix[row].flat, -1 * row)
         return result_matrix
     
     @staticmethod
+    def mix_column(column):
+        result_column = np.zeros((4, 1), dtype=int)
+        result_column[0] = GMUL_BY2[column[0]] ^ GMUL_BY3[column[1]] ^          column[2]  ^          column[3]
+        result_column[1] =          column[0]  ^ GMUL_BY2[column[1]] ^ GMUL_BY3[column[2]] ^          column[3]
+        result_column[2] =          column[0]  ^          column[1]  ^ GMUL_BY2[column[2]] ^ GMUL_BY3[column[3]]
+        result_column[3] = GMUL_BY3[column[0]] ^          column[1]  ^          column[2]  ^ GMUL_BY2[column[3]]
+        return result_column
+
+    @staticmethod
     def mix_columns(state_matrix):
-        pass
+        result_matrix = AESMatrix()
+        for column in range(0, 4):
+            result_matrix[:, column] = AES128Engine.mix_column(state_matrix[:, column].flat)
+        return result_matrix
 
     @staticmethod
     def encrypt_block(block):

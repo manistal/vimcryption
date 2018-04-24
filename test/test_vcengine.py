@@ -176,3 +176,12 @@ class TestAES128Engine(unittest.TestCase):
         result_matrix = AES128Engine.shift_rows(state_matrix)
 
         np.testing.assert_array_equal(expected_matrix, result_matrix)
+
+    def test_mix_columns(self):
+        state_matrix = aesutil.bytesToMatrix("\x63\x2F\xAF\xA2\xEB\x93\xC7\x20\x9F\x92\xAB\xCB\xA0\xC0\x30\x2B")
+        expected_matrix = aesutil.bytesToMatrix("\xBA\x75\xF4\x7A\x84\xA4\x8D\x32\xE8\x8D\x06\x0E\x1B\x40\x7D\x5D")
+
+        result_matrix = AES128Engine.mix_columns(state_matrix)
+
+        np.testing.assert_array_equal(expected_matrix, result_matrix)
+
