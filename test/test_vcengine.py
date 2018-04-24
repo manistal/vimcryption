@@ -188,8 +188,7 @@ class TestAES128Engine(unittest.TestCase):
     def test_encrypt_str(self):
         cipher_key = "\x54\x68\x61\x74\x73\x20\x6D\x79\x20\x4B\x75\x6E\x67\x20\x46\x75"
         plaintext_block = "\x54\x77\x6F\x20\x4F\x6E\x65\x20\x4E\x69\x6E\x65\x20\x54\x77\x6F"  
-        #expected_ciphertext = "\x29\xC3\x50\x5F\x57\x14\x20\xF6\x40\x22\x99\xB3\x1A\x02\xD7\x3A"
-        expected_ciphertext = "29c3505f571420f6402299b31a02d73a"
+        expected_ciphertext = "\x29\xC3\x50\x5F\x57\x14\x20\xF6\x40\x22\x99\xB3\x1A\x02\xD7\x3A"
 
         aes128 = AES128Engine()
         aes128.round_keys = AES128Engine.generate_round_keys(cipher_key)

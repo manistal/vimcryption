@@ -11,7 +11,7 @@ __all__ = [
     "AES_SBOX", "AES_SBOX_INV", "AES_RCON",
     "GMUL_BY2", "GMUL_BY3", 
     "GMUL_BY11", "GMUL_BY13", "GMUL_BY14", 
-    "AESMatrix", "bytesToMatrix", "matrixToString"
+    "AESMatrix", "bytesToMatrix", "matrixToString", "matrixToBytes"
 ]
 
 
@@ -29,11 +29,18 @@ def bytesToMatrix(byte_str):
             matrix[row, col] = ord(byte_str[(col * 4) + row])
     return matrix
 
+def matrixToBytes(matrix):
+    byte_str = b""
+    for column in range(0, 4):
+        for row in range(0, 4):
+            byte_str += chr(matrix[row, column])
+    return byte_str
+
 def matrixToString(matrix):
     byte_str = ""
     for column in range(0, 4):
         for row in range(0, 4):
-            byte_str += "{:02x}".format(int(matrix[row, column]))
+            byte_str += "{:02x}".format(matrix[row, column])
     return byte_str
 
 

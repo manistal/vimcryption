@@ -131,7 +131,7 @@ class AES128Engine(BlockCipherEngine):
         state_matrix = AES128Engine.shift_rows(state_matrix)
         state_matrix = AES128Engine.add_round_key(state_matrix, self.round_keys[10])
 
-        return matrixToString(state_matrix)
+        return matrixToBytes(state_matrix)
 
     @staticmethod
     def decrypt_block(block):
