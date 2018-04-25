@@ -1,19 +1,22 @@
-os:
-- linux
-- osx
+language:
+  python
 
-language: python
+os:
+  - linux
+  - osx
 
 python:
-- '2.7'
-- '3.4'
-- '3.5'
-- '3.6'
+  - '2.7'
+  - '3.4'
+  - '3.5'
+  - '3.6'
 
-#install:
-#- python setup.py test
+script:
+  python setup.py test
 
-script: python setup.py test
+matrix:
+  allow_failures:
+    - os: osx
 
 notifications:
   slack:
