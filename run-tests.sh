@@ -60,8 +60,6 @@ __setup_venv() {
       fi
     fi
     __stderr echo "    python$1 ($__python) -> venv$1"
-    . venv$1/bin/activate
-    pip install --force-reinstall .
   fi
   exit 0
 }
@@ -72,7 +70,7 @@ __do_tests() {
   echo "--Running Python$1 Tests--"
   . venv$1/bin/activate
   __python=$(__get_python_interpreter_path $1)
-  nose2 -s test/
+  $__python setup.py -q test
   echo "---------Complete---------"
   echo
 }
@@ -102,7 +100,7 @@ __parse_yaml() {
 }
 
 
-export PYTHONDONTWRITEBYTECODE=1
+#export PYTHONDONTWRITEBYTECODE=1
 
 __prefix="__quiet"
 if [ "$1" = "-v" ] ; then
@@ -117,27 +115,34 @@ __versions=($(__parse_yaml *.yml))
 # Disable dot glob
 shopt -u dotglob
 # Get the array of version numbers
-__versions=($(echo "${__versions[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+__versions=($(echo "${__versions[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | uniq))
 
 echo "Setting up Python virtual environments"
 
-declare -A __pids
-declare -A __rcs
+declare -a __pids
+declare -a __rcs
+let i=0
 for __version in "${__versions[@]}" ; do
   $__prefix __setup_venv $__version &
-  __pids[$__version]=$!
+  __pids[$i]=$!
+  let i=i+1
 done
 
+
+let i=0
 for __version in "${!__pids[@]}" ; do
   wait ${__pids[$__version]}
-  __rcs["$__version"]=$?
+  __rcs[$i]=$?
+  let i=i+1
 done
 
 echo "done."
 echo
 
-for __version in "${!__rcs[@]}" ; do
-  if [ "${__rcs[$__version]}" = "0" ] ; then
-    __do_tests "$__version"
+let i=0
+for __pid in "${!__pids[@]}" ; do
+  if [ "${__rcs[$i]}" = "0" ] ; then
+    __do_tests "${__versions[$i]}"
   fi
+  let i=i+1
 done
