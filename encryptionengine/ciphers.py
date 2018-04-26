@@ -30,6 +30,7 @@ class CipherFactory:
             self.CIPHERS[cipher_token] = cipher_engine
 
     def getEngineForCipher(self, cipher_type, prompt=input):
+        cipher_type = cipher_type.strip()  # Sanitize surrounding whitespace 
         if cipher_type not in self.CIPHERS:
             raise UnsupportedCipherException("Tried to construct unsupported cipher: " + cipher_type)
         return self.CIPHERS[cipher_type](prompt=prompt)
