@@ -1,7 +1,7 @@
-[report]
+[run]
 omit =
     .eggs/*
     test/*
-    venv*/*
+    .venv*/*
     setup.py
     *__init__.py
