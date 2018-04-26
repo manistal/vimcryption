@@ -19,5 +19,6 @@ setup(
     test_suite='nose2.collector.collector',
     tests_require=[
         'nose2',
+        'nose2[coverage_plugin]>=0.6.5',
     ],
 )

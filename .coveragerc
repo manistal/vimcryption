@@ -1,0 +1,7 @@
+[report]
+omit =
+    .eggs/*
+    test/*
+    venv*/*
+    setup.py
+    *__init__.py

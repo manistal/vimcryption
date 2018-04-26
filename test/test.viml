@@ -16,4 +16,4 @@
 :Vimcrypt BASE64
 :write
 
-:quit
+:quit!
