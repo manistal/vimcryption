@@ -20,5 +20,6 @@ setup(
     tests_require=[
         'nose2',
         'nose2[coverage_plugin]>=0.6.5',
+        'pylint',
     ],
 )

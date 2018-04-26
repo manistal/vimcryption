@@ -43,23 +43,22 @@ __get_python_interpreter_path() {
 # Create a new virtual environment for a particular python version
 __setup_venv() {
   local __python
-  # rm -rf venv$1
   __python=$(__get_python_interpreter_path $1)
   if [ "$__python" = "NONE" ] ; then
     __stderr echo "    python$1 not found!"
     exit 1
   else
     __virtualenv=$(dirname $__python)/virtualenv
-    __silence $__virtualenv -v -p $__python venv$1
+    __silence $__virtualenv -v -p $__python .venv$1
     if [ "$?" != "0" ] ; then
       __virtualenv=$(which virtualenv)
-      __silence $__virtualenv -v -p $__python venv$1
+      __silence $__virtualenv -v -p $__python .venv$1
       if [ "$?" != "0" ] ; then
         __stderr echo "    virtualenv executable not found for $__python!"
         exit 1
       fi
     fi
-    __stderr echo "    python$1 ($__python) -> venv$1"
+    __stderr echo "    python$1 ($__python) -> .venv$1"
   fi
   exit 0
 }
@@ -68,9 +67,8 @@ __setup_venv() {
 # Run the unit tests
 __do_tests() {
   echo "--Running Python$1 Tests--"
-  . venv$1/bin/activate
-  __python=$(__get_python_interpreter_path $1)
-  $__python setup.py -q test
+  . .venv$1/bin/activate
+  python setup.py -q test
   echo "---------Complete---------"
   echo
 }
