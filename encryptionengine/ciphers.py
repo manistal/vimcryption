@@ -5,7 +5,7 @@ import importlib
 
 from .engine import PassThrough
 from .base64engine import Base64Engine
-
+from .aes128engine import AES128Engine
 
 class UnsupportedCipherException(Exception):
     pass
@@ -19,7 +19,7 @@ class CipherFactory:
     CIPHERS = {
         'IOPASS' : PassThrough, 
         'BASE64' : Base64Engine, 
-        'AES128' : PassThrough, 
+        'AES128' : AES128Engine, 
         'AES256' : PassThrough
     }
 
@@ -32,7 +32,7 @@ class CipherFactory:
     def getEngineForCipher(self, cipher_type, prompt=input):
         if cipher_type not in self.CIPHERS:
             raise UnsupportedCipherException("Tried to construct unsupported cipher: " + cipher_type)
-        return self.CIPHERS[cipher_type](prompt=prompt, cipher_type=cipher_type)
+        return self.CIPHERS[cipher_type](prompt=prompt)
 
     def getEngineForFile(self, file_handle, prompt=input):
         """ Process vimcryption header

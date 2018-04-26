@@ -1,33 +1,35 @@
 """
 """
+from time import sleep
 
 import vim
 import os
 
 from encryptionengine.engine import PassThrough
 from encryptionengine.ciphers import CipherFactory, UnsupportedCipherException, NotVimcryptedException
+from encryptionengine.aesutil import IncorrectPasswordException
 
 
 def VCPrompt(message):
     vim.command('call inputsave()')
-    vim.command("let user_input = input('" + message + " ')")
+    vim.command("let user_input = inputsecret('" + message + " ')")
     vim.command('call inputrestore()')
     return vim.eval('user_input')
 
 
 class VCFileHandler():
-    def __init__(self, cipher_type=None):
+    def __init__(self):
         """
         Configurations:
         g:vimcryption_cipher   Default cipher type to use
         """
         self.cipher_factory = CipherFactory()
+        self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
+        self.cipher_engine = None
 
-        if cipher_type:
-            self.cipher_type = cipher_type
-        else:
-            self.cipher_type = vim.eval("get(g:, 'vimcryption_cipher', \"IOPASS\")")
-            vim.command("let b:vc_cipher_arg = \"" + self.cipher_type + "\"")
+    def setCipher(self, cipher_type):
+        self.cipher_type = cipher_type
+        self.cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
 
     def VimCryptionRead(self):
         """
@@ -46,14 +48,31 @@ class VCFileHandler():
 
         with open(file_name, 'rb') as current_file:
             try:
-                cipher_engine = self.cipher_factory.getEngineForFile(current_file, prompt=VCPrompt)
-                self.cipher_type = cipher_engine.cipher_type
+                self.cipher_engine = self.cipher_factory.getEngineForFile(current_file, prompt=VCPrompt)
+                self.cipher_type = self.cipher_engine.cipher_type
             except NotVimcryptedException as e:
-                cipher_engine = PassThrough()
+                self.cipher_engine = PassThrough()
                 current_file.seek(0) 
 
-            cipher_engine.readHeader(current_file)
-            cipher_engine.decrypt(current_file, vim.current.buffer)
+            retries = 0
+            while True:
+                try:
+                    self.cipher_engine.decrypt_file(current_file, vim.current.buffer)
+                    break
+
+                except IncorrectPasswordException as e:
+                    retries += 1
+                    if (retries >= 3):
+                        print("Incorrect Password, Max Tries Reached, Showing Encrypted Content")
+                        current_file.seek(0)
+                        self.cipher_engine = PassThrough()
+                        self.cipher_engine.decrypt_file(current_file, vim.current.buffer)
+                        modifiable = False
+                        break
+                    else:
+                        print("Incorrect Password")
+                        self.cipher_engine.cipher_key = self.cipher_engine.get_cipher_key()
+
 
         # Vim adds an extra line at the top of the NEW buffer 
         del vim.current.buffer[0]
@@ -61,19 +80,22 @@ class VCFileHandler():
         # Relock read-only buffers  before user gets it
         if not modifiable: vim.command(":set noma")
 
+        # Redraw after we've loaded to clear out old stuff
+        vim.command(":redraw!")
+
     def VimCryptionWrite(self, buffer, mode):
         file_name = vim.eval('expand("<amatch>")') 
-        new_file = not os.path.exists(file_name)
+        new_file = (file_name != vim.current.buffer.name) or (not os.path.exists(file_name))
+
+        # If we don't already know what cipher to use ask the Factory
+        if (new_file and (self.cipher_engine is None)):
+            try:
+                self.cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
+            except UnsupportedCipherException as e:
+                self.cipher_engine = PassThrough()
 
         with open(file_name, mode) as current_file:
-            try:
-                cipher_engine = self.cipher_factory.getEngineForCipher(self.cipher_type, prompt=VCPrompt)
-            except UnsupportedCipherException as e:
-                cipher_engine = PassThrough()
-                current_file.seek(0) 
-
-            cipher_engine.writeHeader(current_file)
-            cipher_engine.encrypt(vim.current.buffer, current_file)
+            self.cipher_engine.encrypt_file(vim.current.buffer, current_file)
 
         # Writers must always reset the modified bit
         vim.command(':set nomodified')
@@ -89,14 +111,18 @@ class VCFileHandler():
         BufReadCmd: Before starting to edit a new buffer.  
         Should read the file into the buffer. 
         """
+        vim.command('exe "silent doau BufReadPre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionRead()        
+        vim.command('exe "silent doau BufReadPost ".fnameescape(expand("<amatch>"))')
 
     def FileRead(self):
         """
         FileReadCmd: Before reading a file with a ":read" command.
         Should do the reading of the file.
         """
+        vim.command('exe "silent doau FileReadPre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionRead()        
+        vim.command('exe "silent doau FileReadPost ".fnameescape(expand("<amatch>"))')
 
     def BufWrite(self):
         """
@@ -104,7 +130,9 @@ class VCFileHandler():
         Should do the writing of the file and reset 'modified' if successful, unless '+' is in
         'cpo' and writing to another file |cpo-+|. The buffer contents should not be changed.
         """
+        vim.command('exe "silent doau BufWritePre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionWrite(vim.current.buffer, 'wb+')
+        vim.command('exe "silent doau BufWritePost ".fnameescape(expand("<amatch>"))')
 
     def FileWrite(self):
         """
@@ -116,7 +144,9 @@ class VCFileHandler():
         buf_end_line, buf_end_col = vim.buffer.mark("']") 
         current_range = vim.buffer.range(buf_start_line, buf_end_line)
 
+        vim.command('exe "silent doau FileWritePre ".fnameescape(expand("<amatch>"))')
         self.VimCryptionWrite(current_range, 'wb+')
+        vim.command('exe "silent doau FileWritePost ".fnameescape(expand("<amatch>"))')
 
     def FileAppend(self):
         """

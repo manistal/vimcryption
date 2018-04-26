@@ -6,16 +6,14 @@
 
 :echo "Testing IO Pass Vimcryption"
 :edit $PWD/test/iopass_test.txt
-:let g:vimcryption_cipher = "IOPASS"
 :call append('.', "LOLOLOLOL")
-:Vimcrypt
+:Vimcrypt IOPASS
 :write
 
 :echo "Testing Base64 Vimcryption"
 :edit $PWD/test/base64_test.txt
-:let g:vimcryption_cipher = "BASE64"
 :call append('.', "RAWRAWRAWRAWRAWR")
-:Vimcrypt
+:Vimcrypt BASE64
 :write
 
 :quit
