@@ -47,6 +47,7 @@ coverage.xml
 .hypothesis/
 test/*txt
 test/*log
+doc/coverage/
 
 # Translations
 *.mo
