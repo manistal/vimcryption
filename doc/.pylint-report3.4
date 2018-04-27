@@ -1,0 +1,42 @@
+Python 3.4
+
+Using config file /home/tsmanner/vimcryption/.pylintrc
+************* Module encryptionengine
+W:  5, 0: Wildcard import engine (wildcard-import)
+************* Module encryptionengine.engine
+R: 41, 4: Method could be a function (no-self-use)
+************* Module encryptionengine.aes128engine
+C:126, 0: Exactly one space required after assignment
+        result_column[1] =          column[0]  ^ GMUL_BY2[column[1]] ^ GMUL_BY3[column[2]] ^          column[3]
+                         ^ (bad-whitespace)
+C:127, 0: Exactly one space required after assignment
+        result_column[2] =          column[0]  ^          column[1]  ^ GMUL_BY2[column[2]] ^ GMUL_BY3[column[3]]
+                         ^ (bad-whitespace)
+C:162, 0: Exactly one space required after assignment
+        result_column[1] =  GMUL_BY9[column[0]] ^ GMUL_BY14[column[1]] ^ GMUL_BY11[column[2]] ^ GMUL_BY13[column[3]]
+                         ^ (bad-whitespace)
+************* Module test.test_vcengine
+W: 12, 0: Wildcard import encryptionengine (wildcard-import)
+W: 12, 0: Unused import b64encode from wildcard import (unused-wildcard-import)
+W: 12, 0: Unused import BlockCipherEngine from wildcard import (unused-wildcard-import)
+W: 12, 0: Unused import functools from wildcard import (unused-wildcard-import)
+************* Module test.test_vcfilehandler
+C: 50, 0: Trailing newlines (trailing-newlines)
+W: 29,19: Unused argument 'command' (unused-argument)
+R: 29, 4: Method could be a function (no-self-use)
+************* Module test.test_vimscript
+W:  6, 0: Unused import sys (unused-import)
+W:  7, 0: Unused import time (unused-import)
+************* Module plugin.vimcryption
+E:  7, 0: Unable to import 'vim' (import-error)
+W: 96,32: Unused argument 'vim_buffer' (unused-argument)
+W:155,24: Unused variable 'buf_start_col' (unused-variable)
+W:156,22: Unused variable 'buf_end_col' (unused-variable)
+W:169,24: Unused variable 'buf_start_col' (unused-variable)
+W:170,22: Unused variable 'buf_end_col' (unused-variable)
+
+------------------------------------------------------------------
+Your code has been rated at 9.58/10 (previous run: 9.51/10, +0.07)
+PyLint: done  (1 errors, 13 warnings, 4 conventions, 2 refactors, 0 fatals)
+
+

@@ -12,7 +12,7 @@ python:
   - '3.6'
 
 script:
-  python setup.py test
+  nose2 -s test
 
 after_script:
   pylint encryptionengine plugin/vimcryption.py
@@ -20,6 +20,12 @@ after_script:
 matrix:
   allow_failures:
     - os: osx
+  include:
+    - os: linux
+      branches:
+        only: gh-pages
+      script: git merge master --no-edit ; nose2 --coverage encryptionengine -s test ; coverage html -d docs/htmlcov/python$TRAVIS_PYTHON_VERSION ; git commit -a -m "Travis CI updated coverage report." . ; git push
+
 
 notifications:
   slack:
