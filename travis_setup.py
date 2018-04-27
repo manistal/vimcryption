@@ -10,7 +10,7 @@ setup(
     url='https://www.github.com/tsmanner/vimcryption',
     # Travis Unit-Test Installation
     install_requires=[
-        'anybadge==0.1',
+        'anybadge==0.1.0.dev2',
         'coverage>=4.5',
         'coverage-badge',
         'nose2',
