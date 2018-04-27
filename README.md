@@ -1,6 +1,6 @@
 # Vimcryption [![Build Status](https://travis-ci.org/Vipyr/vimcryption.svg?branch=master)](https://travis-ci.org/Vipyr/vimcryption)
 
-[Coverage](doc/)
+[Coverage](doc/coverage/)
 
 Encryption plugin for VIM.
 

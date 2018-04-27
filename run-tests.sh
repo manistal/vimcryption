@@ -99,7 +99,7 @@ __do_tests() {
   #python setup.py -q test
   python setup.py -q install --force
   nose2 --coverage encryptionengine/ -s test
-  coverage html -d htmlcov/python$1
+  coverage html -d doc/coverage/python$1
   coverage report
   coverage erase
   echo
