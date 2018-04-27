@@ -41,7 +41,7 @@ __get_python_interpreter_path() {
 
 
 # Create a new virtual environment for a particular python version
-__setup_venv() {
+__create_venv() {
   local __python
   __python=$(__get_python_interpreter_path $1)
   if [ "$__python" = "NONE" ] ; then
@@ -59,20 +59,22 @@ __setup_venv() {
       fi
     fi
     . .venv$1/bin/activate
-    pip install anybadge
-    pip install coverage-badge
-    pip install nose2
-    pip install numpy
-    pip install pylint
+    __setup_venv $1
     __stderr echo "    python$1 ($__python) -> .venv$1"
   fi
-  exit 0
+}
+
+__setup_venv() {
+  pip install anybadge
+  pip install coverage-badge
+  pip install nose2
+  pip install numpy
+  pip install pylint
 }
 
 
 # Run PyLint
 __do_pylint() {
-  . .venv$1/bin/activate
   LOG_DIR=doc/coverage/python$1
   PYLINT_LOG=$LOG_DIR/pylint.report
   PYLINT_BADGE=$LOG_DIR/pylint.svg
@@ -103,7 +105,6 @@ __do_pylint() {
 # Run unit tests
 __do_tests() {
   echo "--Running Python$1 Tests--"
-  . .venv$1/bin/activate
   python setup.py -q install --force
   nose2 --coverage encryptionengine/ -s test
   coverage html -d doc/coverage/python$1
@@ -148,8 +149,22 @@ __parse_yaml() {
 __prefix="__quiet"
 if [ "$1" = "-v" ] ; then
   __prefix=""
+  shift 1
 elif [ "$1" = "-s" ] ; then
   __prefix="__silence"
+  shift 1
+fi
+
+# If we're just doing document generation, only do the unit tests for the given python version ($1)
+if [ "$DOCGEN" != "" ] ; then
+  # If we see a virtual env for this python version, activate it.
+  if [ -e .venv$1 ] ; then
+    . .venv$1/bin/activate
+  fi
+  $__prefix __setup_venv $1
+  __do_pylint $1
+  __do_tests $1
+  exit 0
 fi
 
 # Enable dot glob so we will see any "hidden" yml files
@@ -165,7 +180,7 @@ echo "Setting up Python virtual environments"
 declare -a __pids
 declare -a __rcs
 for __i in "${!__versions[@]}" ; do
-  $__prefix __setup_venv ${__versions[$__i]} &
+  $__prefix __create_venv ${__versions[$__i]} &
   __pids[$__i]=$!
 done
 
@@ -180,7 +195,9 @@ echo
 
 for __i in "${!__rcs[@]}" ; do
   if [ "${__rcs[$__i]}" = "0" ] ; then
-    __do_pylint "${__versions[$__i]}"
-    __do_tests "${__versions[$__i]}"
+    __version="${__versions[$__i]}"
+    . .venv$__version/bin/activate
+    __do_pylint $__version
+    __do_tests $__version
   fi
 done

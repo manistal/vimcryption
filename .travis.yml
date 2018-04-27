@@ -24,8 +24,7 @@ matrix:
     - os: linux
       branches:
         only: gh-pages
-      script: git merge master --no-edit ; nose2 --coverage encryptionengine -s test ; coverage html -d docs/htmlcov/python$TRAVIS_PYTHON_VERSION ; git commit -a -m "Travis CI updated coverage report." . ; git push
-
+      script: update-gh-pages.sh
 
 notifications:
   slack:
