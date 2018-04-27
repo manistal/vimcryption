@@ -74,17 +74,20 @@ __do_pylint() {
   echo "PyLint: start ($PYLINT_LOG)"
   echo "Python $1" >> $PYLINT_LOG
   echo "" >> $PYLINT_LOG
-  __pylint_out=$(2>&1 pylint encryptionengine plugin/vimcryption.py)
+  __pylint_out=$(2>&1 pylint encryptionengine test plugin/vimcryption.py)
   __pylint_E=$(echo "$__pylint_out" | grep -c "E:")
   __pylint_W=$(echo "$__pylint_out" | grep -c "W:")
   __pylint_C=$(echo "$__pylint_out" | grep -c "C:")
+  __pylint_R=$(echo "$__pylint_out" | grep -c "R:")
+  __pylint_F=$(echo "$__pylint_out" | grep -c "F:")
   echo "$__pylint_out" >> $PYLINT_LOG
-  __summary="PyLint: $__pylint_E errors, $__pylint_W warnings, $__pylint_C conventions"
+  __summary="PyLint: done  ($__pylint_E errors, $__pylint_W warnings, $__pylint_C conventions, $__pylint_R refactors, $__pylint_F fatals)"
   echo "$__summary" >> $PYLINT_LOG
   echo "" >> $PYLINT_LOG
   echo "" >> $PYLINT_LOG
   echo "$__summary"
-  echo "$__pylint_out" | grep "Your code has been rated at " | echo "  "
+  __rating=$(echo "$__pylint_out" | grep "Your code has been rated at ")
+  echo "  $__rating"
   echo
 }
 
