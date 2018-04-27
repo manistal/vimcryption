@@ -40,8 +40,8 @@ W:156,22: Unused variable 'buf_end_col' (unused-variable)
 W:169,24: Unused variable 'buf_start_col' (unused-variable)
 W:170,22: Unused variable 'buf_end_col' (unused-variable)
 
------------------------------------
-Your code has been rated at 9.51/10
+------------------------------------------------------------------
+Your code has been rated at 9.51/10 (previous run: 9.51/10, +0.00)
 PyLint: done  (1 errors, 13 warnings, 8 conventions, 2 refactors, 0 fatals)
 
 
