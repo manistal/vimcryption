@@ -11,6 +11,9 @@ python:
   - '3.5'
   - '3.6'
 
+before_script:
+  python travis_setup.py install
+
 script:
   nose2 -s test
 
@@ -22,6 +25,11 @@ matrix:
     - os: osx
   include:
     - os: linux
+      python:
+        - '2.7'
+        - '3.4'
+        - '3.5'
+        - '3.6'
       branches:
         only: gh-pages
       script: update-gh-pages.sh
