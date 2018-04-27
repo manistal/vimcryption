@@ -3,7 +3,7 @@ language:
 
 os:
   - linux
-  - osx
+#  - osx
 
 python:
   - '2.7'
@@ -11,11 +11,17 @@ python:
   - '3.5'
   - '3.6'
 
-script:
-  python setup.py test
+git:
+  depth: false
 
-after_script:
-  pylint encryptionengine plugin/vimcryption.py
+before_script:
+  python travis_setup.py install
+
+script:
+  nose2 --coverage . -s test
+
+after_success:
+  - codecov
 
 matrix:
   allow_failures:

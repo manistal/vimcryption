@@ -1,6 +1,7 @@
 # Vimcryption [![Build Status](https://travis-ci.org/Vipyr/vimcryption.svg?branch=master)](https://travis-ci.org/Vipyr/vimcryption)
 
 Vimcryption is an extensible cross-platform Python based plugin to do encryption in Vim. Inspired by previous Vim Encryption efforts (http://vim.wikia.com/wiki/Encryption), that lack up-to-date algorithms, or portability, this plugin is designed to give users the flexibility to survive the cryptographic arms race. 
+[Coverage](doc/)
 
 ## Installation
 
