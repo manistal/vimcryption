@@ -17,9 +17,6 @@ before_script:
 script:
   nose2 -s test
 
-after_script:
-  pylint encryptionengine plugin/vimcryption.py
-
 matrix:
   allow_failures:
     - os: osx
