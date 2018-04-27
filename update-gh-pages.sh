@@ -3,7 +3,7 @@
 BRANCH=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match 2> /dev/null || git rev-parse --short HEAD)
 git fetch origin gh-pages
 git remote -v
-git branch
+git branch -a
 git checkout "gh-pages" --
 git pull -X theirs --no-edit
 git merge -X theirs --no-edit master
