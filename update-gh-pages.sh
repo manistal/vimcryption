@@ -9,5 +9,5 @@ DOCGEN=1 ./run-tests.sh $TRAVIS_PYTHON_VERSION
 git status
 git add doc/
 git commit -m "Travis CI updated python$TRAVIS_PYTHON_VERSION coverage report on $(date)"
-git push
+git push -u origin gh-pages
 git checkout $BRANCH
