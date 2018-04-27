@@ -3,8 +3,6 @@ BRANCH=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match 2
 git checkout gh-pages
 git pull -X theirs --no-edit
 git merge -X theirs --no-edit master
-#git checkout master
-#git checkout -B gh-pages master
 DOCGEN=1 ./run-tests.sh $TRAVIS_PYTHON_VERSION
 git status
 git add doc/

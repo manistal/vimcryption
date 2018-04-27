@@ -25,6 +25,7 @@ matrix:
       python: '2.7'
       branches:
         only: gh-pages
+      before_script: python travis_setup.py install ; pip install --user anybadge
       script: ./update-gh-pages.sh
 
 notifications:
