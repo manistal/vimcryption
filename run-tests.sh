@@ -71,20 +71,20 @@ __setup_venv() {
 # Run PyLint
 __do_pylint() {
   . .venv$1/bin/activate
-  echo "PyLint: start ($PYLINT_LOG)"
-  echo "Python $1" >> $PYLINT_LOG
-  echo "" >> $PYLINT_LOG
+  echo "PyLint: start ($PYLINT_LOG$1)"
+  echo "Python $1" > $PYLINT_LOG$1
+  echo "" >> $PYLINT_LOG$1
   __pylint_out=$(2>&1 pylint encryptionengine test plugin/vimcryption.py)
   __pylint_E=$(echo "$__pylint_out" | grep -c "E:")
   __pylint_W=$(echo "$__pylint_out" | grep -c "W:")
   __pylint_C=$(echo "$__pylint_out" | grep -c "C:")
   __pylint_R=$(echo "$__pylint_out" | grep -c "R:")
   __pylint_F=$(echo "$__pylint_out" | grep -c "F:")
-  echo "$__pylint_out" >> $PYLINT_LOG
+  echo "$__pylint_out" >> $PYLINT_LOG$1
   __summary="PyLint: done  ($__pylint_E errors, $__pylint_W warnings, $__pylint_C conventions, $__pylint_R refactors, $__pylint_F fatals)"
-  echo "$__summary" >> $PYLINT_LOG
-  echo "" >> $PYLINT_LOG
-  echo "" >> $PYLINT_LOG
+  echo "$__summary" >> $PYLINT_LOG$1
+  echo "" >> $PYLINT_LOG$1
+  echo "" >> $PYLINT_LOG$1
   echo "$__summary"
   __rating=$(echo "$__pylint_out" | grep "Your code has been rated at ")
   echo "  $__rating"
@@ -96,10 +96,9 @@ __do_pylint() {
 __do_tests() {
   echo "--Running Python$1 Tests--"
   . .venv$1/bin/activate
-  #python setup.py -q test
   python setup.py -q install --force
   nose2 --coverage encryptionengine/ -s test
-  coverage html -d htmlcov/python$1
+  coverage html -d docs/htmlcov/python$1
   coverage report
   coverage erase
   echo
@@ -137,8 +136,7 @@ __parse_yaml() {
 # Main body
 #
 
-PYLINT_LOG=".pylint-report"
-echo "" > $PYLINT_LOG
+PYLINT_LOG="docs/.pylint-report"
 
 __prefix="__quiet"
 if [ "$1" = "-v" ] ; then
