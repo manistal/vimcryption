@@ -18,7 +18,7 @@ before_script:
   python travis_setup.py install
 
 script:
-  nose2 --coverage -s test
+  nose2 --coverage . -s test
 
 after_success:
   - codecov

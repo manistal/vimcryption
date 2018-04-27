@@ -66,6 +66,7 @@ __create_venv() {
 
 __setup_venv() {
   pip install anybadge
+  pip install codecov
   pip install coverage-badge
   pip install nose2
   pip install numpy
