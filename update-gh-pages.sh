@@ -4,7 +4,7 @@ BRANCH=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match 2
 git fetch origin gh-pages
 git remote -v
 git branch -a
-git checkout -b gh-pages FETCH_HEAD
+git checkout gh-pages
 git pull -X theirs --no-edit
 git merge -X theirs --no-edit master
 DOCGEN=1 ./run-tests.sh $TRAVIS_PYTHON_VERSION
