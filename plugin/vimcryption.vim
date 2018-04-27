@@ -46,17 +46,17 @@ function LoadVimcryption(...)
     " If we're given a cipher type from the user, tell VCF to initialize it
     if a:0 > 0
         let b:vc_cipher_arg = a:1
-        python VCF.setCipher(vim.eval('b:vc_cipher_arg'))
+        python VCF.set_cipher(vim.eval('b:vc_cipher_arg'))
     endif
 
     " Overload the File Accessors with our VCF Callbacks
     augroup Vimcryption
         au! 
-        au BufReadCmd    *    py VCF.BufRead()
-        au FileReadCmd   *    py VCF.FileRead()
-        au BufWriteCmd   *    py VCF.BufWrite()
-        au FileWriteCmd  *    py VCF.FileWrite()
-        au FileAppendCmd *    py VCF.FileAppend()
+        au BufReadCmd    *    py VCF.buf_read()
+        au FileReadCmd   *    py VCF.file_read()
+        au BufWriteCmd   *    py VCF.buf_write()
+        au FileWriteCmd  *    py VCF.file_write()
+        au FileAppendCmd *    py VCF.file_append()
     augroup END 
 
     if !exists("b:vimcryption_loaded")
