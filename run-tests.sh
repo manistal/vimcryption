@@ -59,6 +59,7 @@ __setup_venv() {
       fi
     fi
     . .venv$1/bin/activate
+    pip install coverage-badge
     pip install nose2
     pip install numpy
     pip install pylint
@@ -100,6 +101,7 @@ __do_tests() {
   python setup.py -q install --force
   nose2 --coverage encryptionengine/ -s test
   coverage html -d doc/coverage/python$1
+  coverage-badge -o doc/coverage/python$1/coverage.svg
   coverage report
   coverage erase
   echo
