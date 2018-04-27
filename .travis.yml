@@ -18,18 +18,14 @@ before_script:
   python travis_setup.py install
 
 script:
-  nose2 -s test ; ./update-gh-pages.sh
+  nose2 --coverage -s test
+
+after_success:
+  - codecov
 
 matrix:
   allow_failures:
     - os: osx
-#  include:
-#    - os: linux
-#      python: '2.7'
-#      branches:
-#        only: gh-pages
-#      env: PATH=~/.local/bin:$PATH
-#      script: ./update-gh-pages.sh
 
 notifications:
   slack:

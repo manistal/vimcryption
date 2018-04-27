@@ -11,6 +11,7 @@ setup(
     # Travis Unit-Test Installation
     install_requires=[
         'anybadge==0.1.0.dev2',
+        'codecov',
         'coverage>=4.5',
         'coverage-badge',
         'nose2',
