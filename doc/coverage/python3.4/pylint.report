@@ -17,9 +17,9 @@ C:162, 0: Exactly one space required after assignment
                          ^ (bad-whitespace)
 ************* Module test.test_vcengine
 W: 12, 0: Wildcard import encryptionengine (wildcard-import)
-W: 12, 0: Unused import b64encode from wildcard import (unused-wildcard-import)
-W: 12, 0: Unused import BlockCipherEngine from wildcard import (unused-wildcard-import)
 W: 12, 0: Unused import functools from wildcard import (unused-wildcard-import)
+W: 12, 0: Unused import BlockCipherEngine from wildcard import (unused-wildcard-import)
+W: 12, 0: Unused import b64encode from wildcard import (unused-wildcard-import)
 ************* Module test.test_vcfilehandler
 C: 50, 0: Trailing newlines (trailing-newlines)
 W: 29,19: Unused argument 'command' (unused-argument)
@@ -30,10 +30,10 @@ W:  7, 0: Unused import time (unused-import)
 ************* Module plugin.vimcryption
 E:  7, 0: Unable to import 'vim' (import-error)
 W: 96,32: Unused argument 'vim_buffer' (unused-argument)
-W:155,24: Unused variable 'buf_start_col' (unused-variable)
 W:156,22: Unused variable 'buf_end_col' (unused-variable)
-W:169,24: Unused variable 'buf_start_col' (unused-variable)
+W:155,24: Unused variable 'buf_start_col' (unused-variable)
 W:170,22: Unused variable 'buf_end_col' (unused-variable)
+W:169,24: Unused variable 'buf_start_col' (unused-variable)
 
 ------------------------------------------------------------------
 Your code has been rated at 9.58/10 (previous run: 9.51/10, +0.07)

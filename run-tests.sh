@@ -59,6 +59,7 @@ __setup_venv() {
       fi
     fi
     . .venv$1/bin/activate
+    pip install anybadge
     pip install coverage-badge
     pip install nose2
     pip install numpy
@@ -72,24 +73,30 @@ __setup_venv() {
 # Run PyLint
 __do_pylint() {
   . .venv$1/bin/activate
-  echo "PyLint: start ($PYLINT_LOG$1)"
-  echo "Python $1" > $PYLINT_LOG$1
-  echo "" >> $PYLINT_LOG$1
+  LOG_DIR=doc/coverage/python$1
+  PYLINT_LOG=$LOG_DIR/pylint.report
+  PYLINT_BADGE=$LOG_DIR/pylint.svg
+  echo "PyLint: start ($PYLINT_LOG)"
+  echo "Python $1" > $PYLINT_LOG
+  echo "" >> $PYLINT_LOG
   __pylint_out=$(2>&1 pylint encryptionengine test plugin/vimcryption.py)
   __pylint_E=$(echo "$__pylint_out" | grep -c "E:")
   __pylint_W=$(echo "$__pylint_out" | grep -c "W:")
   __pylint_C=$(echo "$__pylint_out" | grep -c "C:")
   __pylint_R=$(echo "$__pylint_out" | grep -c "R:")
   __pylint_F=$(echo "$__pylint_out" | grep -c "F:")
-  echo "$__pylint_out" >> $PYLINT_LOG$1
+  echo "$__pylint_out" >> $PYLINT_LOG
   __summary="PyLint: done  ($__pylint_E errors, $__pylint_W warnings, $__pylint_C conventions, $__pylint_R refactors, $__pylint_F fatals)"
-  echo "$__summary" >> $PYLINT_LOG$1
-  echo "" >> $PYLINT_LOG$1
-  echo "" >> $PYLINT_LOG$1
+  echo "$__summary" >> $PYLINT_LOG
+  echo "" >> $PYLINT_LOG
+  echo "" >> $PYLINT_LOG
   echo "$__summary"
-  __rating=$(echo "$__pylint_out" | grep "Your code has been rated at ")
-  echo "  $__rating"
+  __rating_line=$(echo "$__pylint_out" | grep "Your code has been rated at ")
+  __rating=$(echo "$__rating_line" | cut -d ' ' -f7 | cut -d '/' -f1)
+  echo "  $__rating_line"
   echo
+  rm -f $PYLINT_BADGE
+  anybadge -l pylint -v $__rating -f $PYLINT_BADGE 2=red 4=orange 8=yellow 10=green
 }
 
 
@@ -137,8 +144,6 @@ __parse_yaml() {
 #
 # Main body
 #
-
-PYLINT_LOG="doc/.pylint-report"
 
 __prefix="__quiet"
 if [ "$1" = "-v" ] ; then
