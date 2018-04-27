@@ -1,7 +1,7 @@
 # Always recreate the gh-pages branch!
 BRANCH=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match 2> /dev/null || git rev-parse --short HEAD)
 git checkout gh-pages
-git pull
+git pull -X theirs
 git merge -X theirs master
 #git checkout master
 #git checkout -B gh-pages master
