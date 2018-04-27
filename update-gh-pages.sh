@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Always recreate the gh-pages branch!
 BRANCH=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match 2> /dev/null || git rev-parse --short HEAD)
-git fetch origin
+git fetch origin gh-pages
 git remote -v
 git branch
 git checkout "gh-pages" --
