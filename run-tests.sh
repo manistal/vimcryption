@@ -161,7 +161,7 @@ if [ "$DOCGEN" != "" ] ; then
   if [ -e .venv$1 ] ; then
     . .venv$1/bin/activate
   fi
-  $__prefix __setup_venv $1
+  #$__prefix __setup_venv $1
   __do_pylint $1
   __do_tests $1
   exit 0

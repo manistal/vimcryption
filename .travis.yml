@@ -22,14 +22,10 @@ matrix:
     - os: osx
   include:
     - os: linux
-      python:
-        - '2.7'
-        - '3.4'
-        - '3.5'
-        - '3.6'
+      python: '2.7'
       branches:
         only: gh-pages
-      script: update-gh-pages.sh
+      script: ./update-gh-pages.sh
 
 notifications:
   slack:
