@@ -11,7 +11,7 @@ setup(
     # Travis Unit-Test Installation
     install_requires=[
         'anybadge',
-        'coverage',
+        'coverage>=4.5',
         'coverage-badge',
         'nose2',
         'nose2[coverage_plugin]>=0.6.5',
