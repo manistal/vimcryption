@@ -9,46 +9,48 @@ import unittest
 import subprocess as sp
 
 
+TEST_DIR = os.path.dirname(__file__)
+TEST_NAME_TEMPLATE = os.path.join(TEST_DIR, "{}_test.txt")
+
 class TestVimcryptionVimscript(unittest.TestCase):
     """ Integration testing for vimcryption vim plugin
         instantiates vim with plugin and runs commands
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """ Clear out any artifacts from previous testing.
-        """
-        if os.path.exists("test/iopass_test.txt"):
-            os.remove("test/iopass_test.txt")
-        if os.path.exists("test/base64_test.txt"):
-            os.remove("test/base64_test.txt")
+    @staticmethod
+    def setUp():
+        """ Clean up after interrupted previous runs. """
+        TestVimcryptionVimscript.cleanUp()
 
-    @classmethod
-    def tearDownClass(cls):
-        """ Clear out any artifacts at the end of testing.
-        """
-        if os.path.exists("test/iopass_test.txt"):
-            os.remove("test/iopass_test.txt")
-        if os.path.exists("test/base64_test.txt"):
-            os.remove("test/base64_test.txt")
+    @staticmethod
+    def tearDown():
+        """ Clean up after testing. """
+        TestVimcryptionVimscript.cleanUp()
 
-    @unittest.skip("Currently failing in python 3 due to weird numpy import issue. #74")
+    @staticmethod
+    def cleanUp():
+        """ Clear out any artifacts from testing. """
+        for engine in ["iopass", "base64"]:
+            test_name = TEST_NAME_TEMPLATE.format(engine)
+            if os.path.exists(test_name):
+                os.remove(test_name)
+
     def test_vimscript(self):
         """ Test `vim` by invoking vim with a script file that produces some artifact files
             that we can check.  Once the files are produced, check that the plaintext and
             ciphertext files have the expected contents.
         """
         # Actual vim commands in viml script, pass them to Vim instance
-        proc = sp.Popen(["vim -s test/test.viml"], shell=True)
+        proc = sp.Popen(["vim -s {}/test.viml".format(TEST_DIR)], shell=True)
         proc.wait()
 
         # Assert there was a zero return code
         self.assertEqual(proc.returncode, 0)
 
         # Check file output for plaintext
-        with open("test/iopass_test.txt") as iop:
+        with open(TEST_NAME_TEMPLATE.format("iopass")) as iop:
             self.assertEqual(iop.read(), "\nLOLOLOLOL\n")
 
         # Check file output for plaintext
-        with open("test/base64_test.txt") as b64:
+        with open(TEST_NAME_TEMPLATE.format("base64")) as b64:
             self.assertEqual(b64.read(), "dmltY3J5cHRlZA==QkFTRTY0ClJBV1JBV1JBV1JBV1JBV1IK")
