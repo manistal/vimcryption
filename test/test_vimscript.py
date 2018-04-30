@@ -12,6 +12,7 @@ import subprocess as sp
 TEST_DIR = os.path.dirname(__file__)
 TEST_NAME_TEMPLATE = os.path.join(TEST_DIR, "{}_test.txt")
 
+
 class TestVimcryptionVimscript(unittest.TestCase):
     """ Integration testing for vimcryption vim plugin
         instantiates vim with plugin and runs commands
