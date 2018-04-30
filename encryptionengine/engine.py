@@ -11,7 +11,7 @@ class EncryptionEngine(object):
     """
     @staticmethod
     def buffer_iter(data):
-        #type: List[str]
+        # type: List[str]
         """ Generative iterator that yields each character
             from a list of strings, joined by newlines.
         """
