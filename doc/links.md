@@ -1,7 +1,9 @@
-# BufWrite new filename behavior 
+# Vimcryption Links
 
-https://stackoverflow.com/questions/12324696/bufwritecmd-handler
+## BufWrite new filename behavior
 
-# Syntax Highlighting Callstack
+<https://stackoverflow.com/questions/12324696/bufwritecmd-handler>
 
-http://vimdoc.sourceforge.net/htmldoc/syntax.html
+## Syntax Highlighting Callstack
+
+<http://vimdoc.sourceforge.net/htmldoc/syntax.html>
