@@ -1,4 +1,4 @@
-# Project Milestone for Vimcryption
+# Project Final for Vimcryption
 
 _Authors: Tom Manner, Miguel Nistal_
 _MSCS630 Spring 2018_
@@ -103,24 +103,58 @@ testing and encryption schemes.  VIM configuration and installation unit tests a
 affected by any future changes.  A pure python implementation of AES128 will allow passkey based encryption in an easily
 delivered, cross-platform package.
 
-### Conclusion 
+### Conclusion
 
-    - Generators are awesome
-    - Vimscript documentation is awesome
-    - Issue tracking and agile development is awesome
-    - Unit testing, static analysis, all done via travisCI also awesome
-        - Continuous development and deployment without breakage 
-        - Cut down on time spent debugging breakage and always protected the codebase 
-        - Forced us into good coding practices 
-    - Forks are awesome, code isolation
+This methodology proved very effective, especially when supported by some key tools and language features.  Python's
+`generator` and `iterator` patterns made it very easy to write code that performs well and is easy to extend without
+making the functional intent unclear.  Combining these allowed us to write generic code that is able to handle
+arbitrarily large files or IO streams.  An iterator for block ciphers is concisely defined as a generator function,
+yielding one block at a time from the stream.  The function reads like a simple for loop, but effectively pauses each
+time an element is yielded.  Definition of a block cipher engine requires only that the block size and encrypt/decrypt
+functions are defined.
 
-### Future Development Plans 
+The VIM API for Python proved to be easy to set up, mostly thanks to very thorough documentation.  It helped especially
+with some of the non-obvious steps associated with intercepting file access safely.  There turns out to be a concise
+framework for file handling without affecting other plugins or VIM itself.  The Vimscript API and ability to invoke VIM
+also allowed us to write integration tests that automated regression testing our plugin in situ.
 
-The final project might be done, but development on Vimcryption is far from over! We've been looking for a fun and interesting open source project to work on for a long time and working with cryptography in Python has been a great experience. Based on what we've done so far, the path forward has been pretty clear and we've continued to document our roadmap using ZenHub and Issues on the new Vimcryption repository. The next important steps are to address security concerns in the library by updating the AES algorithm to operate in CBC mode, and to fix the salting of the password expansion to use different salt values for each password hash to defend against rainbow attacks on the header. We'll also be implementing AES192 and AES256 to improve the security of the ciphers available to the users. 
+To support smooth development, we set up a full agile development environment and workflow.  This includes GitHub forks
+of the code repository for each of us, issue tracking with an agile board, and continuous integration using TravisCI.
+Unit tests, coverage, and static analysis tools were invoked by TravisCI on each repository update and pull request.
+By tuning the static analysis tools and ensuring full test coverage, we were able to nearly guarantee that code written
+by any developer on any fork could not cause breakage anywhere else.  In the case that one fork did contain bad code,
+no disruption occurred because the forks fully isolated our development environments.  Combined with judicious use of
+the agile board, independent development of work items was incredibly smooth.
 
-Even with a variety of ciphers with secure implementations, Vimcryption still lacks the most important tool in any software toolbox - Extensibility. We've implemented a hook in the factory that allows users to dynamically import their own libraries, but this still lacks any Vimscript API or meaningful examples of how to use it. We plan on addressing this by extending the factory hook into the Vimscript to allow users to add to their cipher options directly from their `.vimrc` file. To illustrate the usage, and to begin laying the groundwork for external contributors, we'll also implement the Ceasar Cipher in such a way that we can make it available as a tutorial. The Ceasar Ciher makes a great candidate for this purpose due to it's extreme simplicity, so that users can focus on the API and Engine implementation rather than cipher details. 
+### Future Development Plans
 
-Finally, after all the development effort in both Vim and the Cipher engines, it's become clear that the EncryptionEngine package could easily stand on it's own as a library. Python currently lacks a standard library solution for encryption (despite cryptographic hash support via `hashlib`). Using generators to process blocks of text has become a cornerstone in efficient Python development, and being able to do so with cryptography feels like a natural extension of the language. When stepping back and looking at the EncryptionEngine package on it's own, FileIO becomes a clear next step. We plan on developing a context manager for File IO that would allow users to process encrypted files in exactly the same way as they would regular files through the standard `open()` and file handler interface. Competing libraries in the space such as `pyaes` currently don't support modern Python constructs such as context managers and generators or familiar syntax from the standard library. We see a great oppurtunity to contribute to the cryptographic python community and hope we might even get to publish a PEP!
+The final project might be done, but development on Vimcryption is far from over! We've been looking for a fun and
+interesting open source project to work on for a long time and working with cryptography in Python has been a great
+experience. Based on what we've done so far, the path forward has been pretty clear and we've continued to document our
+roadmap using ZenHub and Issues on the new Vimcryption repository. The next important steps are to address security
+concerns in the library by updating the AES algorithm to operate in CBC mode, and to fix the salting of the password
+expansion to use different salt values for each password hash to defend against rainbow attacks on the header. We'll
+also be implementing AES192 and AES256 to improve the security of the ciphers available to the users.
+
+Even with a variety of ciphers with secure implementations, Vimcryption still lacks the most important tool in any
+software toolbox - Extensibility. We've implemented a hook in the factory that allows users to dynamically import their
+own libraries, but this still lacks any Vimscript API or meaningful examples of how to use it. We plan on addressing
+this by extending the factory hook into the Vimscript to allow users to add to their cipher options directly from their
+`.vimrc` file. To illustrate the usage, and to begin laying the groundwork for external contributors, we'll also
+implement the Ceasar Cipher in such a way that we can make it available as a tutorial. The Ceasar Ciher makes a great
+candidate for this purpose due to it's extreme simplicity, so that users can focus on the API and Engine implementation
+rather than cipher details.
+
+Finally, after all the development effort in both Vim and the Cipher engines, it's become clear that the
+EncryptionEngine package could easily stand on it's own as a library. Python currently lacks a standard library solution
+for encryption (despite cryptographic hash support via `hashlib`). Using generators to process blocks of text has become
+a cornerstone in efficient Python development, and being able to do so with cryptography feels like a natural extension
+of the language. When stepping back and looking at the EncryptionEngine package on it's own, FileIO becomes a clear next
+step. We plan on developing a context manager for File IO that would allow users to process encrypted files in exactly
+the same way as they would regular files through the standard `open()` and file handler interface. Competing libraries
+in the space such as `pyaes` currently don't support modern Python constructs such as context managers and generators or
+familiar syntax from the standard library. We see a great oppurtunity to contribute to the cryptographic python
+community and hope we might even get to publish a PEP!
 
 
 <div style="page-break-after: always;"></div>
