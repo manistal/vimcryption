@@ -118,3 +118,6 @@ venv*/
 
 # pylint
 .pylint-report
+
+# PyCharm
+.idea/
